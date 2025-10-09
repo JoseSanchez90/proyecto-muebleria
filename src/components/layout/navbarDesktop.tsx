@@ -55,7 +55,7 @@ function NavbarDesktop() {
   }, []);
 
   return (
-    <section className="hidden lg:flex w-full h-full justify-center pt-6 xl:px-24 2xl:px-40 bg-gray-100">
+    <section className="hidden lg:flex w-full h-full justify-center pt-6 xl:px-20 2xl:px-40 bg-gray-100">
       <div className="w-full flex justify-between items-center z-20">
         <Link to="/">
           <button className="flex items-center gap-2 cursor-pointer">
@@ -198,7 +198,7 @@ function NavbarDesktop() {
                   <div className="absolute right-0 mt-10 w-72 bg-white rounded-lg shadow-lg py-2 z-50">
                     {/* Header del menú con avatar más grande */}
                     <div className="px-4 py-3 border-b flex items-center gap-3">
-                      <div className="w-full rounded-full overflow-hidden border border-gray-300">
+                      <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300">
                         {user.user_metadata?.avatar_url ? (
                           <img
                             src={user.user_metadata.avatar_url}
@@ -232,6 +232,13 @@ function NavbarDesktop() {
                       Mi perfil
                     </Link>
                     <Link
+                      to="/mis-favoritos"
+                      className="block px-4 py-2 text-sm hover:bg-gray-100"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      Mis favoritos
+                    </Link>
+                    <Link
                       to="/mis-pedidos"
                       className="block px-4 py-2 text-sm hover:bg-gray-100"
                       onClick={() => setShowMenu(false)}
@@ -243,8 +250,17 @@ function NavbarDesktop() {
                       disabled={loggingOut}
                       className="w-full cursor-pointer text-left px-4 py-2 text-sm hover:bg-gray-100 text-red-600 flex items-center gap-2 disabled:opacity-50"
                     >
-                      <LogOut className="w-4 h-4" />
-                      {loggingOut ? "Cerrando sesión..." : "Cerrar sesión"}
+                      {loggingOut ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                          <span>Cerrando sesión...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <LogOut className="w-4 h-4 flex-shrink-0" />
+                          <span>Cerrar sesión</span>
+                        </div>
+                      )}
                     </button>
                   </div>
                 )}
@@ -277,23 +293,18 @@ function NavbarDesktop() {
                 />
               </>
             )}
-
             {/* Carrito con contador */}
             <Link to="/carrito" className="flex items-center justify-center">
               <div className="relative flex items-center justify-center rounded-full p-2 transition-all duration-300 cursor-pointer">
                 {/* Icono del carrito */}
                 <ShoppingCart className="w-6 h-6 text-black" />
 
-                {/* Burbuja del contador */}
-                <div
-                  className={`absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold ${
-                    totalItems > 0
-                      ? "bg-red-500 text-white"
-                      : "bg-gray-400 text-white"
-                  }`}
-                >
-                  {totalItems}
-                </div>
+                {/* Burbuja del contador - SOLO cuando hay productos */}
+                {totalItems > 0 && (
+                  <div className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold bg-red-500 text-white">
+                    {totalItems}
+                  </div>
+                )}
               </div>
             </Link>
           </div>

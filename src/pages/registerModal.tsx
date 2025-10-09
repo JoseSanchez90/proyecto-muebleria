@@ -42,7 +42,11 @@ interface Distrito {
   provincia_id: string;
 }
 
-function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps) {
+function RegisterModal({
+  isOpen,
+  onClose,
+  onSwitchToLogin,
+}: RegisterModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     lastName: "",
@@ -65,42 +69,98 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
   const [open, setOpen] = useState(false);
-  const [departamento, setDepartamento] = useState<string>("");
-  const [provincia, setProvincia] = useState<string>("");
-  const [distrito, setDistrito] = useState<string>("");
 
-  const [provinciasFiltradas, setProvinciasFiltradas] = useState<Provincia[]>([]);
+  const [provinciasFiltradas, setProvinciasFiltradas] = useState<Provincia[]>(
+    []
+  );
   const [distritosFiltrados, setDistritosFiltrados] = useState<Distrito[]>([]);
 
   useEffect(() => {
-    if (departamento) {
+    console.log(
+      "🔄 useEffect departamento - formData.department:",
+      formData.department
+    );
+
+    if (formData.department) {
+      console.log(
+        "🎯 Filtrando provincias para departamento:",
+        formData.department
+      );
+
       const filtradas = provincias
-        .filter((prov) => prov.department_id === departamento)
+        .filter((prov) => {
+          console.log(
+            "📊 Provincia:",
+            prov.name,
+            "department_id:",
+            prov.department_id
+          );
+          return prov.department_id === formData.department;
+        })
         .map((prov) => ({
           id: prov.id,
           nombre: prov.name,
           departamento_id: prov.department_id,
         }));
+
+      console.log("✅ Provincias filtradas:", filtradas);
       setProvinciasFiltradas(filtradas);
-      setProvincia("");
-      setDistrito("");
+
+      // Limpiar provincia y distrito cuando cambia departamento
+      setFormData((prev) => ({
+        ...prev,
+        province: "",
+        district: "",
+      }));
       setDistritosFiltrados([]);
+
+      console.log("🧹 Provincia y distrito limpiados");
+    } else {
+      console.log("❌ No hay departamento seleccionado, limpiando provincias");
+      setProvinciasFiltradas([]);
     }
-  }, [departamento]);
+  }, [formData.department]);
 
   useEffect(() => {
-    if (provincia) {
+    console.log(
+      "🔄 useEffect provincia - formData.province:",
+      formData.province
+    );
+
+    if (formData.province) {
+      console.log("🎯 Filtrando distritos para provincia:", formData.province);
+
       const filtradas = distritos
-        .filter((dist) => dist.province_id === provincia)
+        .filter((dist) => {
+          console.log(
+            "📊 Distrito:",
+            dist.name,
+            "province_id:",
+            dist.province_id
+          );
+          return dist.province_id === formData.province;
+        })
         .map((dist) => ({
           id: dist.id,
           nombre: dist.name,
           provincia_id: dist.province_id,
         }));
+
+      console.log("✅ Distritos filtrados:", filtradas);
       setDistritosFiltrados(filtradas as Distrito[]);
-      setDistrito("");
+
+      // Limpiar distrito cuando cambia provincia
+      setFormData((prev) => ({
+        ...prev,
+        district: "",
+      }));
+
+      console.log("🧹 Distrito limpiado");
+    } else {
+      console.log("❌ No hay provincia seleccionada, limpiando distritos");
+      setDistritosFiltrados([]);
     }
-  }, [provincia]);
+  }, [formData.province]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -110,34 +170,55 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
     }));
   };
 
+  // Envio de formulario
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
+    console.log("📝 Datos del formulario a enviar:", {
+      department: formData.department,
+      province: formData.province,
+      district: formData.district,
+      name: formData.name,
+      lastname: formData.lastName,
+      email: formData.email,
+      birthdate: formData.birthdate,
+      phone: formData.phone,
+      address: formData.address,
+      dni: formData.dni
+      // otros campos importantes...
+    });
+
     if (formData.password !== formData.confirmPassword) {
+      console.log("❌ Error: Contraseñas no coinciden");
       setError("Las contraseñas no coinciden");
       return;
     }
 
     if (formData.password.length < 6) {
+      console.log("❌ Error: Contraseña muy corta");
       setError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
     if (!formData.acceptTerms) {
+      console.log("❌ Error: Términos no aceptados");
       setError("Debes aceptar los términos y condiciones");
       return;
     }
 
+    console.log("✅ Validaciones pasadas, iniciando registro...");
     setLoading(true);
 
     try {
       const { error } = await signUp(formData);
 
       if (error) {
+        console.log("❌ Error en signUp:", error);
         setError(error.message || "Error al crear la cuenta");
         toast.error("❌ Error al crear la cuenta. Inténtalo nuevamente.");
       } else {
+        console.log("✅ Cuenta creada exitosamente");
         toast.success("¡Cuenta creada exitosamente!");
         onClose();
         // Resetear formulario
@@ -159,10 +240,11 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
         });
       }
     } catch (err) {
-      console.error("Error inesperado:", err);
+      console.error("❌ Error inesperado en handleSubmit:", err);
       toast.error("Ocurrió un error inesperado. Inténtalo más tarde.");
     } finally {
       setLoading(false);
+      console.log("🏁 Finalizado handleSubmit");
     }
   };
 
@@ -177,7 +259,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
       />
 
       {/* Modal - Con scroll */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[80vh] animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] animate-in fade-in zoom-in duration-200">
         {/* Botón cerrar */}
         <button
           onClick={onClose}
@@ -307,10 +389,9 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
                           if (date) {
                             const formatted = `${date.getFullYear()}-${String(
                               date.getMonth() + 1
-                            ).padStart(2, "0")}-${String(date.getDate()).padStart(
-                              2,
-                              "0"
-                            )}`;
+                            ).padStart(2, "0")}-${String(
+                              date.getDate()
+                            ).padStart(2, "0")}`;
                             setFormData((prev) => ({
                               ...prev,
                               birthdate: formatted,
@@ -357,14 +438,20 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Departamento
                   </label>
-                  <Select value={departamento} onValueChange={setDepartamento}>
+                  <Select
+                    value={formData.department}
+                    onValueChange={(value) => {
+                      console.log("🎯 Departamento seleccionado:", value);
+                      setFormData((prev) => ({ ...prev, department: value }));
+                    }}
+                  >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccione" />
+                      <SelectValue placeholder="Selecciona departamento" />
                     </SelectTrigger>
                     <SelectContent>
-                      {departamentos.map((dpto) => (
-                        <SelectItem key={dpto.id} value={dpto.id}>
-                          {dpto.name}
+                      {departamentos.map((depto) => (
+                        <SelectItem key={depto.id} value={depto.id}>
+                          {depto.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -375,12 +462,21 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
                     Provincia
                   </label>
                   <Select
-                    value={provincia}
-                    onValueChange={setProvincia}
-                    disabled={!departamento}
+                    value={formData.province}
+                    onValueChange={(value) => {
+                      console.log("🎯 Provincia seleccionada:", value);
+                      setFormData((prev) => ({ ...prev, province: value }));
+                    }}
+                    disabled={!formData.department}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccione" />
+                      <SelectValue
+                        placeholder={
+                          formData.department
+                            ? "Selecciona provincia"
+                            : "Primero selecciona departamento"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {provinciasFiltradas.map((prov) => (
@@ -396,12 +492,21 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }: RegisterModalProps)
                     Distrito
                   </label>
                   <Select
-                    value={distrito}
-                    onValueChange={setDistrito}
-                    disabled={!provincia}
+                    value={formData.district}
+                    onValueChange={(value) => {
+                      console.log("🎯 Distrito seleccionado:", value);
+                      setFormData((prev) => ({ ...prev, district: value }));
+                    }}
+                    disabled={!formData.province}
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Seleccione" />
+                      <SelectValue
+                        placeholder={
+                          formData.province
+                            ? "Selecciona distrito"
+                            : "Primero selecciona provincia"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {distritosFiltrados.map((dist) => (

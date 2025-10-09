@@ -2,6 +2,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Loader from "@/components/common/loader";
 import MainLayout from "@/components/layout/mainLayout";
+import Favorites from "@/pages/favorites";
+import Orders from "@/pages/orders";
+// import Checkout from "@/pages/checkout";
 
 // Lazy load de las páginas
 const Home = lazy(() => import("@/pages/home"))
@@ -22,7 +25,10 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <Home /> },
       { path: "/perfil", element: <Profile /> },
-      { path: "/producto/:id", element: <ProductDetail /> },
+      { path: "/productos/:id", element: <ProductDetail /> },
+      // { path: "/verificacion-de-pago", element: <Checkout /> },
+      { path: "/mis-favoritos", element: <Favorites /> },
+      { path: "/mis-pedidos", element: <Orders /> },
       { path: "/sofas", element: <Sofa /> },
       { path: "/sillas", element: <Silla /> },
       { path: "/mesas", element: <Mesa /> },

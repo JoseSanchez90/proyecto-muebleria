@@ -1,13 +1,21 @@
 // src/pages/ProductDetail.tsx
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabaseClient';
-import { ShoppingCart, Heart, ChevronRight, Minus, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { supabase } from "../lib/supabaseClient";
+import { ShoppingCart, Heart, ChevronRight, Minus, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cartContext";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import AnimatedShoppingBag from "@/assets/icons/shoppingBag";
+import { useFavorites } from "@/context/favoriteContext";
 
 interface Producto {
   id: string;
@@ -24,16 +32,20 @@ interface Producto {
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const [producto, setProducto] = useState<Producto | null>(null);
-  const [productosRelacionados, setProductosRelacionados] = useState<Producto[]>([]);
+  const [productosRelacionados, setProductosRelacionados] = useState<
+    Producto[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [cantidad, setCantidad] = useState(1);
   const { addToCart } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
+  const [toggling] = useState<string | null>(null);
 
   useEffect(() => {
     if (id) {
       loadProducto();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadProducto = async () => {
@@ -42,9 +54,9 @@ function ProductDetail() {
 
       // Cargar producto principal
       const { data: productoData, error: productoError } = await supabase
-        .from('productos')
-        .select('*')
-        .eq('id', id)
+        .from("productos")
+        .select("*")
+        .eq("id", id)
         .single();
 
       if (productoError) throw productoError;
@@ -54,16 +66,16 @@ function ProductDetail() {
       // Cargar productos relacionados de la misma categoría
       if (productoData) {
         const { data: relacionados } = await supabase
-          .from('productos')
-          .select('*')
-          .eq('categoria', productoData.categoria)
-          .neq('id', id)
+          .from("productos")
+          .select("*")
+          .eq("categoria", productoData.categoria)
+          .neq("id", id)
           .limit(4);
 
         setProductosRelacionados(relacionados || []);
       }
     } catch (error) {
-      console.error('Error al cargar producto:', error);
+      console.error("Error al cargar producto:", error);
     } finally {
       setLoading(false);
     }
@@ -74,22 +86,22 @@ function ProductDetail() {
       for (let i = 0; i < cantidad; i++) {
         addToCart(producto);
       }
-      toast.custom(() => (
-      <div className="bg-white flex items-center gap-3 p-2 rounded-2xl">
-        <AnimatedShoppingBag />
-        <div>
-          <p className="text-sm font-semibold text-black">
-            ¡{producto.nombre}!
-          </p>
-          <p className="text-sm text-gray-600">
-            agregado al carrito
-          </p>
-        </div>
-      </div>
-    ),
-    {
-    duration: 2500, // milisegundos
-    });
+      toast.custom(
+        () => (
+          <div className="bg-white flex items-center gap-3 p-2 rounded-2xl">
+            <AnimatedShoppingBag />
+            <div>
+              <p className="text-sm font-semibold text-black">
+                ¡{producto.nombre}!
+              </p>
+              <p className="text-sm text-gray-600">agregado al carrito</p>
+            </div>
+          </div>
+        ),
+        {
+          duration: 2500, // milisegundos
+        }
+      );
     }
   };
 
@@ -120,11 +132,17 @@ function ProductDetail() {
         {/* Breadcrumb */}
         <div className="mx-auto px-4 py-4">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <Link to="/" className="hover:text-black">Inicio</Link>
+            <Link to="/" className="hover:text-black">
+              Inicio
+            </Link>
             <ChevronRight className="w-4 h-4" />
-            <Link to="/" className="hover:text-black">Productos</Link>
+            <Link to="/" className="hover:text-black">
+              Productos
+            </Link>
             <ChevronRight className="w-4 h-4" />
-            <Link to="/" className="hover:text-black">{producto.categoria}</Link>
+            <Link to="/" className="hover:text-black">
+              {producto.categoria}
+            </Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-black">{producto.nombre}</span>
           </div>
@@ -142,7 +160,7 @@ function ProductDetail() {
                   className="w-full h-[500px] object-cover"
                 />
               </div>
-              
+
               {/* Miniaturas (puedes agregar más imágenes aquí) */}
               <div className="grid grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map((i) => (
@@ -163,7 +181,7 @@ function ProductDetail() {
             {/* Información del producto */}
             <section>
               <h1 className="text-4xl font-bold mb-2">{producto.nombre}</h1>
-              
+
               <p className="text-gray-600 mb-4 leading-relaxed">
                 {producto.descripcion}
               </p>
@@ -175,7 +193,9 @@ function ProductDetail() {
               {/* Opciones (Color, Material - puedes personalizarlos) */}
               <div className="space-y-6 mb-8">
                 <Select>
-                  <label className="block text-sm font-semibold mb-3">Color</label>
+                  <label className="block text-sm font-semibold mb-3">
+                    Color
+                  </label>
                   <SelectTrigger className="w-full border border-gray-400 bg-white">
                     <SelectValue placeholder="Selecciona el color" />
                   </SelectTrigger>
@@ -189,7 +209,9 @@ function ProductDetail() {
                 </Select>
 
                 <Select>
-                  <label className="block text-sm font-semibold mb-3">Material</label>
+                  <label className="block text-sm font-semibold mb-3">
+                    Material
+                  </label>
                   <SelectTrigger className="w-full border border-gray-400 bg-white">
                     <SelectValue placeholder="Selecciona el material" />
                   </SelectTrigger>
@@ -214,7 +236,9 @@ function ProductDetail() {
                   </button>
                   <span className="px-6 font-semibold">{cantidad}</span>
                   <button
-                    onClick={() => setCantidad(Math.min(producto.stock, cantidad + 1))}
+                    onClick={() =>
+                      setCantidad(Math.min(producto.stock, cantidad + 1))
+                    }
                     className="p-2 cursor-pointer hover:bg-gray-200"
                   >
                     <Plus className="w-5 h-5" />
@@ -222,7 +246,7 @@ function ProductDetail() {
                 </div>
 
                 <Button
-                size="lg"
+                  size="lg"
                   onClick={handleAddToCart}
                   disabled={producto.stock === 0}
                   className="flex-1 cursor-pointer text-white text-lg"
@@ -231,8 +255,18 @@ function ProductDetail() {
                   Añadir al carrito
                 </Button>
 
-                <button className="bg-white border border-gray-300 px-2 rounded-lg">
-                  <Heart className="w-8 h-8 text-red-500 cursor-pointer" />
+                <button
+                  onClick={() => toggleFavorite(producto.id)}
+                  disabled={toggling === producto.id}
+                  className="w-10 flex justify-center cursor-pointer items-center bg-white rounded-full shadow-md hover:bg-gray-50 transition disabled:opacity-50"
+                >
+                  <Heart
+                    className={`w-5 h-5 ${
+                      isFavorite(producto.id)
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-400 hover:text-red-500"
+                    }`}
+                  />
                 </button>
               </div>
 
@@ -243,9 +277,7 @@ function ProductDetail() {
                     Descripción completa
                     <ChevronRight className="w-5 h-5" />
                   </summary>
-                  <p className="mt-4 text-gray-600">
-                    {producto.descripcion}
-                  </p>
+                  <p className="mt-4 text-gray-600">{producto.descripcion}</p>
                 </details>
 
                 <details className="border-b border-gray-200 py-4">
@@ -276,15 +308,17 @@ function ProductDetail() {
           {/* Productos relacionados */}
           {productosRelacionados.length > 0 && (
             <section className="mt-20">
-              <h2 className="text-3xl font-bold mb-8">Productos Relacionados</h2>
+              <h2 className="text-3xl font-bold mb-8">
+                Productos Relacionados
+              </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {productosRelacionados.map((prod) => (
-                  <Link
-                    key={prod.id}
-                    to={`/producto/${prod.id}`}
-                    className="group"
-                  >
-                    <div className="border bg-white border-gray-200 rounded-2xl">
+                  <div className="border bg-white border-gray-200 rounded-2xl">
+                    <Link
+                      key={prod.id}
+                      to={`/productos/${prod.id}`}
+                      className="group"
+                    >
                       <div className="rounded-t-2xl overflow-hidden">
                         <img
                           src={prod.imagen_url}
@@ -292,14 +326,25 @@ function ProductDetail() {
                           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-semibold mb-2">{prod.nombre}</h3>
-                        <p className="text-black font-bold">
-                          S/ {prod.precio.toFixed(2)}
-                        </p>
-                      </div>
+                    </Link>
+                    <div className="p-4 space-y-2">
+                      <h3 className="text-lg mb-2">{prod.nombre}</h3>
+                      <p className="text-black font-bold">
+                        S/ {prod.precio.toFixed(2)}
+                      </p>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddToCart()}
+                        disabled={producto.stock === 0}
+                        className="w-full cursor-pointer"
+                      >
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        {producto.stock === 0
+                          ? "Agotado"
+                          : "Agregar al carrito"}
+                      </Button>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </section>

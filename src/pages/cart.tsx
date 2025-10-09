@@ -1,14 +1,14 @@
-// src/pages/Cart.tsx
-
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useCart } from "@/context/cartContext";
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Cart() {
-  const { items, updateQuantity, removeFromCart, getTotal, clearCart } = useCart();
+  const { items, updateQuantity, removeFromCart, getTotal, clearCart } =
+    useCart();
 
-  const envio = 50.00;
+  const envio = 0;
   const subtotal = getTotal();
   const total = subtotal + (items.length > 0 ? envio : 0);
 
@@ -22,11 +22,8 @@ function Cart() {
             Agrega productos para continuar con tu compra
           </p>
           <Link to="/">
-            <Button 
-              className="cursor-pointer"
-              size="lg"
-            >
-            Ir a comprar
+            <Button className="cursor-pointer" size="lg">
+              Ir a comprar
             </Button>
           </Link>
         </div>
@@ -35,10 +32,12 @@ function Cart() {
   }
 
   return (
-    <main className="min-h-screen px-4 md:px-20 py-16 bg-gray-100">
+    <main className="min-h-screen px-4 md:px-20 py-12 2xl:py-16 bg-gray-100">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">Tu Carrito</h1>
-        <p className="text-gray-600 mb-8">Revisa tus artículos y procede al pago.</p>
+        <h1 className="text-3xl 2xl:text-4xl font-bold mb-1">Tu Carrito</h1>
+        <p className="text-gray-600 mb-4 2xl:mb-8">
+          Revisa tus artículos y procede al pago.
+        </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Lista de productos */}
@@ -61,9 +60,7 @@ function Cart() {
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {item.descripcion}
                   </p>
-                  <p className="text-xl font-bold">
-                    S/ {item.precio.toFixed(2)}
-                  </p>
+                  <p className="font-bold">Color:</p>
                 </div>
 
                 {/* Controles */}
@@ -107,7 +104,7 @@ function Cart() {
 
           {/* Resumen del pedido */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl p-6 sticky top-24">
+            <div className="bg-white rounded-xl p-6 sticky top-24 shadow-md">
               <h2 className="text-2xl font-bold mb-6">Resumen del Pedido</h2>
 
               <div className="space-y-3 mb-6">
@@ -131,12 +128,8 @@ function Cart() {
                   Código de promoción
                 </label>
                 <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Introduce tu código"
-                    className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                  <Button size="lg" className="cursor-pointer">
+                  <Input type="text" placeholder="Introduce tu código" />
+                  <Button size="sm" className="cursor-pointer">
                     Aplicar
                   </Button>
                 </div>
@@ -144,17 +137,19 @@ function Cart() {
 
               {/* Botones */}
               <div className="flex flex-col gap-2">
-                <Button size="lg" className="cursor-pointer">
-                    Proceder al Pago
-                </Button>
-                
+                <Link to="/checkout">
+                  <Button className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-full font-semibold mt-4">
+                    Proceder al pago
+                  </Button>
+                </Link>
+
                 <Button
-                    variant="destructive"
-                    size="lg"
-                    onClick={clearCart}
-                    className="cursor-pointer"
+                  variant="destructive"
+                  size="lg"
+                  onClick={clearCart}
+                  className="cursor-pointer"
                 >
-                    Vaciar carrito
+                  Vaciar carrito
                 </Button>
               </div>
             </div>

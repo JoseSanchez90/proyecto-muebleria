@@ -1,9 +1,11 @@
 // src/components/LoginModal.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/components/Authentication/authContext";
 import { X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import ForgotPasswordModal from "@/pages/forgotPasswordModal";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -12,18 +14,45 @@ interface LoginModalProps {
 }
 
 function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
-  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  // Cargar credenciales guardadas cuando abre el modal
+  useEffect(() => {
+    if (isOpen) {
+      const savedEmail = localStorage.getItem("rememberedEmail");
+      const savedPassword = localStorage.getItem("rememberedPassword");
+
+      console.log("Credenciales guardadas encontradas:", {
+        email: savedEmail,
+        password: savedPassword ? "***" : null,
+      });
+
+      if (savedEmail && savedPassword) {
+        setEmail(savedEmail);
+        setPassword(savedPassword);
+        setRememberMe(true);
+        console.log("✅ Credenciales cargadas automáticamente");
+      }
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    console.log("Intentando login con:", {
+      email,
+      password: "***",
+      rememberMe,
+    });
 
     const { error } = await signIn(email, password);
 
@@ -31,6 +60,18 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
       setError("Correo o contraseña incorrectos");
       setLoading(false);
     } else {
+      // 👇 GUARDAR o ELIMINAR credenciales según el checkbox
+      if (rememberMe) {
+        localStorage.setItem("rememberedEmail", email);
+        localStorage.setItem("rememberedPassword", password);
+        console.log("Credenciales guardadas en localStorage");
+      } else {
+        localStorage.removeItem("rememberedEmail");
+        localStorage.removeItem("rememberedPassword");
+        console.log("Credenciales eliminadas de localStorage");
+      }
+
+      console.log("✅ Login exitoso");
       onClose();
       setEmail("");
       setPassword("");
@@ -48,7 +89,7 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8 animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8 animate-in fade-in zoom-in duration-200">
         {/* Botón cerrar */}
         <button
           onClick={onClose}
@@ -59,7 +100,9 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
 
         {/* Contenido */}
         <div>
-          <h2 className="text-2xl font-bold mb-2 text-center">Iniciar Sesión</h2>
+          <h2 className="text-2xl font-bold mb-1 text-center">
+            Iniciar Sesión
+          </h2>
           <p className="text-gray-600 mb-6 text-center">
             Ingresa tus credenciales para continuar
           </p>
@@ -112,10 +155,30 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
               </div>
             </div>
 
-            <div className="text-right">
+            {/* Checkbox Recordar sesión - NUEVO */}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="rememberMe"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                className="data-[state=checked]:bg-black data-[state=checked]:text-white"
+              />
+              <label
+                htmlFor="rememberMe"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Recordar mis datos
+              </label>
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                {/* El checkbox ya está arriba, puedes eliminar este espacio si quieres */}
+              </div>
               <button
                 type="button"
-                className="text-sm text-gray-600 hover:text-gray-900"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm text-gray-600 hover:text-black transition-colors underline cursor-pointer"
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -124,14 +187,26 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-semibold cursor-pointer"
+              className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-semibold cursor-pointer disabled:opacity-70"
             >
-              {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+              {loading ? (
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Iniciando sesión...</span>
+                </div>
+              ) : (
+                "Iniciar Sesión"
+              )}
             </Button>
+
+            <ForgotPasswordModal
+              isOpen={showForgotPassword}
+              onClose={() => setShowForgotPassword(false)}
+            />
           </form>
 
           {/* Separador */}
-          <div className="relative my-6">
+          <div className="relative my-2">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-300"></div>
             </div>
@@ -144,10 +219,10 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
           <Button
             type="button"
             onClick={() => {
-              onClose(); // cierra el modal login
-              onSwitchToRegister(); // abre el modal registro
+              onClose();
+              onSwitchToRegister();
             }}
-            className="w-full border-2 bg-white border-gray-400 hover:bg-gray-100 text-black py-3 rounded-lg font-semibold transition cursor-pointer"
+            className="w-full border-2 bg-white border-black hover:bg-gray-100 text-black rounded-lg font-semibold transition cursor-pointer"
           >
             Crear cuenta nueva
           </Button>

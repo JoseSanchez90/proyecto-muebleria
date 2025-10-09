@@ -2,10 +2,20 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/Authentication/authContext";
 import { supabase } from "@/lib/supabaseClient";
-import { Camera, MapPin, Package, Save } from "lucide-react";
+import { Camera, MapPin, Package, Save, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import departamentos from "@/data/departamentos.json";
+import provincias from "@/data/provincias.json";
+import distritos from "@/data/distritos.json";
 
 interface UserProfile {
   id: string;
@@ -31,6 +41,18 @@ interface Order {
   items_count: number;
 }
 
+interface Provincia {
+  id: string;
+  nombre: string;
+  departamento_id: string;
+}
+
+interface Distrito {
+  id: string;
+  nombre: string;
+  provincia_id: string;
+}
+
 function Profile() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"personal" | "address" | "orders">(
@@ -38,6 +60,10 @@ function Profile() {
   );
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [provinciasFiltradas, setProvinciasFiltradas] = useState<Provincia[]>(
+    []
+  );
+  const [distritosFiltrados, setDistritosFiltrados] = useState<Distrito[]>([]);
 
   // Estado para información personal
   const [profile, setProfile] = useState<UserProfile>({
@@ -63,6 +89,8 @@ function Profile() {
     if (user) {
       loadProfile();
       loadOrders();
+    } else {
+      window.location.href = "/";
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
@@ -113,6 +141,37 @@ function Profile() {
       console.error("Error al cargar pedidos:", error);
     }
   };
+
+  // USEEFFECT PARA FILTRADO
+  useEffect(() => {
+    if (profile.department) {
+      const filtradas = provincias // ← Array completo de provincias
+        .filter((prov) => prov.department_id === profile.department)
+        .map((prov) => ({
+          id: prov.id,
+          nombre: prov.name,
+          departamento_id: prov.department_id,
+        }));
+      setProvinciasFiltradas(filtradas);
+    } else {
+      setProvinciasFiltradas([]);
+    }
+  }, [profile.department]);
+
+  useEffect(() => {
+    if (profile.province) {
+      const filtradas = distritos // ← Array completo de distritos
+        .filter((dist) => dist.province_id === profile.province)
+        .map((dist) => ({
+          id: dist.id,
+          nombre: dist.name,
+          provincia_id: dist.province_id,
+        }));
+      setDistritosFiltrados(filtradas);
+    } else {
+      setDistritosFiltrados([]);
+    }
+  }, [profile.province]);
 
   // Usar profile.avatar_url en lugar de user.user_metadata
   const avatarSrc = profile.avatar_url
@@ -216,8 +275,18 @@ function Profile() {
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
+      console.log("🔄 Actualizando perfil...", {
+        userId: user?.id,
+        data: {
+          name: profile.name,
+          last_name: profile.last_name,
+          phone: profile.phone,
+          dni: profile.dni,
+          birthdate: profile.birthdate,
+        },
+      });
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .update({
           name: profile.name,
@@ -226,16 +295,27 @@ function Profile() {
           dni: profile.dni,
           birthdate: profile.birthdate,
         })
-        .eq("id", user?.id);
+        .eq("id", user?.id)
+        .select();
 
-      if (error) throw error;
+      console.log("✅ Resultado update:", data);
+      console.log("❌ Error update:", error);
 
+      // CORREGIDO: Solo lanzar error si realmente hay error
+      if (error) {
+        console.error("Error al guardar perfil:", error);
+        throw error;
+      }
+
+      // Si llegamos aquí, la actualización fue exitosa
+      console.log("✅ Perfil actualizado correctamente en la base de datos");
       toast.success("Perfil actualizado correctamente");
     } catch (error) {
-      console.error("Error al guardar perfil:", error);
+      console.error("Error en handleSaveProfile:", error);
       toast.error("Error al actualizar el perfil");
     } finally {
       setLoading(false);
+      console.log("🏁 Finalizado handleSaveProfile");
     }
   };
 
@@ -243,7 +323,7 @@ function Profile() {
     try {
       setLoading(true);
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .update({
           address: profile.address,
@@ -252,7 +332,11 @@ function Profile() {
           province: profile.province,
           district: profile.district,
         })
-        .eq("id", user?.id);
+        .eq("id", user?.id)
+        .select(); // ← Agregar para ver el resultado
+
+      console.log("✅ Dirección actualizada:", data);
+      console.log("❌ Error dirección:", error);
 
       if (error) throw error;
 
@@ -327,18 +411,18 @@ function Profile() {
           <div className="flex border-b overflow-x-auto">
             <button
               onClick={() => setActiveTab("personal")}
-              className={`flex items-center gap-2 px-6 py-4 font-semibold transition whitespace-nowrap ${
+              className={`flex items-center gap-2 px-6 py-4 font-semibold transition whitespace-nowrap cursor-pointer ${
                 activeTab === "personal"
                   ? "border-b-2 border-black text-black"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              <Camera className="w-5 h-5" />
+              <User className="w-5 h-5" />
               Información Personal
             </button>
             <button
               onClick={() => setActiveTab("address")}
-              className={`flex items-center gap-2 px-6 py-4 font-semibold transition whitespace-nowrap ${
+              className={`flex items-center gap-2 px-6 py-4 font-semibold transition whitespace-nowrap cursor-pointer ${
                 activeTab === "address"
                   ? "border-b-2 border-black text-black"
                   : "text-gray-500 hover:text-gray-700"
@@ -349,7 +433,7 @@ function Profile() {
             </button>
             <button
               onClick={() => setActiveTab("orders")}
-              className={`flex items-center gap-2 px-6 py-4 font-semibold transition whitespace-nowrap ${
+              className={`flex items-center gap-2 px-6 py-4 font-semibold transition whitespace-nowrap cursor-pointer ${
                 activeTab === "orders"
                   ? "border-b-2 border-black text-black"
                   : "text-gray-500 hover:text-gray-700"
@@ -454,7 +538,7 @@ function Profile() {
                 <Button
                   onClick={handleSaveProfile}
                   disabled={loading}
-                  className="bg-black hover:bg-gray-800"
+                  className="bg-black hover:bg-gray-800 cursor-pointer"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {loading ? "Guardando..." : "Guardar Cambios"}
@@ -503,46 +587,93 @@ function Profile() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Departamento
                     </label>
-                    <Input
+                    <Select
                       value={profile.department}
-                      onChange={(e) =>
+                      onValueChange={(value) =>
                         setProfile((prev) => ({
                           ...prev,
-                          department: e.target.value,
+                          department: value,
+                          province: "", // Limpiar provincia
+                          district: "", // Limpiar distrito
                         }))
                       }
-                      placeholder="Lima"
-                    />
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona departamento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {departamentos.map((depto) => (
+                          <SelectItem key={depto.id} value={depto.id}>
+                            {depto.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Provincia
                     </label>
-                    <Input
+                    <Select
                       value={profile.province}
-                      onChange={(e) =>
+                      onValueChange={(value) =>
                         setProfile((prev) => ({
                           ...prev,
-                          province: e.target.value,
+                          province: value,
+                          district: "", // Limpiar distrito
                         }))
                       }
-                      placeholder="Lima"
-                    />
+                      disabled={!profile.department}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            profile.department
+                              ? "Selecciona provincia"
+                              : "Primero selecciona departamento"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {provinciasFiltradas.map((prov) => (
+                          <SelectItem key={prov.id} value={prov.id}>
+                            {prov.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Distrito
                     </label>
-                    <Input
+                    <Select
                       value={profile.district}
-                      onChange={(e) =>
+                      onValueChange={(value) =>
                         setProfile((prev) => ({
                           ...prev,
-                          district: e.target.value,
+                          district: value,
                         }))
                       }
-                      placeholder="Miraflores"
-                    />
+                      disabled={!profile.province}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            profile.province
+                              ? "Selecciona distrito"
+                              : "Primero selecciona provincia"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {distritosFiltrados.map((dist) => (
+                          <SelectItem key={dist.id} value={dist.id}>
+                            {dist.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -571,7 +702,7 @@ function Profile() {
                 <Button
                   onClick={handleSaveAddress}
                   disabled={loading}
-                  className="bg-black hover:bg-gray-800"
+                  className="bg-black hover:bg-gray-800 cursor-pointer"
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {loading ? "Guardando..." : "Guardar Dirección"}

@@ -99,7 +99,7 @@ function MasVendidos() {
             >
               {/* Imagen del producto */}
               <div className="aspect-square w-full h-60 2xl:h-96 overflow-hidden relative cursor-pointer" 
-                onClick={() => navigate(`/producto/${producto.id}`)}>
+                onClick={() => navigate(`/productos/${producto.id}`)}>
                 <img
                   src={producto.imagen_url}
                   alt={producto.nombre}
