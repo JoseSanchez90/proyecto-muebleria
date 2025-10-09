@@ -6,7 +6,7 @@ import { Toaster } from "./components/ui/sonner.tsx";
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Toaster position="bottom-left"  />
+    <Toaster position="top-center"  />
     <App />
   </React.StrictMode>,
 )
