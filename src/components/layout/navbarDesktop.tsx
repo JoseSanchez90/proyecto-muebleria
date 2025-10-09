@@ -60,7 +60,7 @@ function NavbarDesktop() {
         <Link to="/">
           <button className="flex items-center gap-2 cursor-pointer">
             <img
-              src="/public/logo.png"
+              src="/logo.png"
               className="w-12 2xl:w-16"
             ></img>
             <p className="font-sans font-bold text-xl 2xl:text-2xl">Munfort</p>

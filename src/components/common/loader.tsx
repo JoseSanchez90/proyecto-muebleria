@@ -19,7 +19,7 @@ function Loader() {
         {/* Logo */}
         <div className="flex items-center justify-center gap-3">
           <img
-            src="/public/logo.png"
+            src="/logo.png"
             className="w-10 h-10"
             alt="Munfort"
           />
