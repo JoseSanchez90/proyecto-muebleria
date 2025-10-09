@@ -1,6 +1,3 @@
-// LOGO
-import Logo from "@/assets/images/logo.png"
-
 // SILLAS
 import SillaComedor from "@/assets/images/sillas/silla-comedor.jpg"
 import SillaOficina from "@/assets/images/sillas/silla-oficina.jpg"
@@ -20,9 +17,7 @@ import DecoracionBaño from "@/assets/images/decoracion/decoracion-baño.jpg"
 import DecoracionParedes from "@/assets/images/decoracion/decoracion-paredes.jpg"
 
 export const IMAGES = {
-    logo: {
-        Logo,
-    },
+
     sillas: {
         SillaComedor,
         SillaOficina

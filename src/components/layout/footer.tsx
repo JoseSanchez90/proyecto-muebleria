@@ -5,7 +5,7 @@ function Footer() {
     <section className="w-full px-20 bg-black/10">
       <div className="py-6 2xl:py-12 grid grid-cols-4 justify-items-center items-center border-b border-gray-400">
         <div className="flex flex-col gap-2 justify-center items-center">
-          <img src="/src/assets/images/logo.png" alt="Logo" className="w-32 2xl:w-48" />
+          <img src="/public/logo.png" alt="Logo" className="w-32 2xl:w-48" />
           <div className="flex flex-col justify-center items-center">
             <h2 className="text-2xl font-bold">Muebles Munfort</h2>
             <p>Diseño que transforma tu hogar</p>
