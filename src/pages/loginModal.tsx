@@ -5,15 +5,20 @@ import { X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import ForgotPasswordModal from "@/pages/forgotPasswordModal";
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToRegister: () => void;
+  onSwitchToForgotPassword: () => void;
 }
 
-function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
+function LoginModal({
+  isOpen,
+  onClose,
+  onSwitchToRegister,
+  onSwitchToForgotPassword,
+}: LoginModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +26,6 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Cargar credenciales guardadas cuando abre el modal
   useEffect(() => {
@@ -89,7 +93,7 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-8 animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8 animate-in fade-in zoom-in duration-200">
         {/* Botón cerrar */}
         <button
           onClick={onClose}
@@ -177,7 +181,10 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
               </div>
               <button
                 type="button"
-                onClick={() => setShowForgotPassword(true)}
+                onClick={() => {
+                  onClose();
+                  onSwitchToForgotPassword();
+                }}
                 className="text-sm text-gray-600 hover:text-black transition-colors underline cursor-pointer"
               >
                 ¿Olvidaste tu contraseña?
@@ -198,11 +205,6 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) {
                 "Iniciar Sesión"
               )}
             </Button>
-
-            <ForgotPasswordModal
-              isOpen={showForgotPassword}
-              onClose={() => setShowForgotPassword(false)}
-            />
           </form>
 
           {/* Separador */}

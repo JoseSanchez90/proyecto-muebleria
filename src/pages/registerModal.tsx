@@ -1,4 +1,3 @@
-// src/components/RegisterModal.tsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/Authentication/authContext";
@@ -77,20 +76,20 @@ function RegisterModal({
 
   useEffect(() => {
     console.log(
-      "🔄 useEffect departamento - formData.department:",
+      "useEffect departamento - formData.department:",
       formData.department
     );
 
     if (formData.department) {
       console.log(
-        "🎯 Filtrando provincias para departamento:",
+        "Filtrando provincias para departamento:",
         formData.department
       );
 
       const filtradas = provincias
         .filter((prov) => {
           console.log(
-            "📊 Provincia:",
+            "Provincia:",
             prov.name,
             "department_id:",
             prov.department_id
@@ -114,7 +113,7 @@ function RegisterModal({
       }));
       setDistritosFiltrados([]);
 
-      console.log("🧹 Provincia y distrito limpiados");
+      console.log("Provincia y distrito limpiados");
     } else {
       console.log("❌ No hay departamento seleccionado, limpiando provincias");
       setProvinciasFiltradas([]);
@@ -123,17 +122,17 @@ function RegisterModal({
 
   useEffect(() => {
     console.log(
-      "🔄 useEffect provincia - formData.province:",
+      "useEffect provincia - formData.province:",
       formData.province
     );
 
     if (formData.province) {
-      console.log("🎯 Filtrando distritos para provincia:", formData.province);
+      console.log("Filtrando distritos para provincia:", formData.province);
 
       const filtradas = distritos
         .filter((dist) => {
           console.log(
-            "📊 Distrito:",
+            "Distrito:",
             dist.name,
             "province_id:",
             dist.province_id
@@ -155,7 +154,7 @@ function RegisterModal({
         district: "",
       }));
 
-      console.log("🧹 Distrito limpiado");
+      console.log("Distrito limpiado");
     } else {
       console.log("❌ No hay provincia seleccionada, limpiando distritos");
       setDistritosFiltrados([]);
@@ -244,7 +243,7 @@ function RegisterModal({
       toast.error("Ocurrió un error inesperado. Inténtalo más tarde.");
     } finally {
       setLoading(false);
-      console.log("🏁 Finalizado handleSubmit");
+      console.log("Finalizado handleSubmit");
     }
   };
 
@@ -260,6 +259,7 @@ function RegisterModal({
 
       {/* Modal - Con scroll */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] animate-in fade-in zoom-in duration-200">
+        
         {/* Botón cerrar */}
         <button
           onClick={onClose}

@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import ScrollToTop from "../ui/scrollToTop";
+import ScrollToTop from "@/components/ui/scrollToTop";
 
 interface MainLayoutProps {
   admin?: boolean; // opcional: para distinguir si es layout de admin o cliente

@@ -8,13 +8,14 @@ import { Input } from "../ui/input";
 import { IoIosSearch } from "react-icons/io";
 import { IMAGES } from "@/assets/images";
 import { CategoryMenuItem } from "../common/categoryMenuItem";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LogOut, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/context/cartContext";
 import { useAuth } from "../Authentication/authContext";
 import { useEffect, useRef, useState } from "react";
 import LoginModal from "@/pages/loginModal";
 import RegisterModal from "@/pages/registerModal";
+import ForgotPasswordModal from "@/pages/forgotPasswordModal";
 
 function NavbarDesktop() {
   const { getTotalItems } = useCart();
@@ -22,18 +23,23 @@ function NavbarDesktop() {
   const [loggingOut, setLoggingOut] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const totalItems = getTotalItems();
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const navigate = useNavigate();
+  const { clearCart } = useCart();
 
-  // Cerrar Sesion
+  // Cerrar sesión
   const handleSignOut = async () => {
     setLoggingOut(true);
     try {
-      await signOut();
-      // Pequeño delay para asegurar que todo se limpie
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      window.location.href = "/";
+      await signOut(); // Esto ya limpia la sesión en Supabase
+
+      await clearCart();
+
+      // Redirigir con React Router (sin recargar toda la app)
+      navigate("/"); // ← Usa useNavigate() de react-router-dom
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     } finally {
@@ -59,10 +65,7 @@ function NavbarDesktop() {
       <div className="w-full flex justify-between items-center z-20">
         <Link to="/">
           <button className="flex items-center gap-2 cursor-pointer">
-            <img
-              src="/logo.png"
-              className="w-12 2xl:w-16"
-            ></img>
+            <img src="/logo.png" className="w-12 2xl:w-16"></img>
             <p className="font-sans font-bold text-xl 2xl:text-2xl">Munfort</p>
           </button>
         </Link>
@@ -165,14 +168,14 @@ function NavbarDesktop() {
                 className="relative flex flex-col items-center"
                 ref={menuRef}
               >
-                {/* Botón que muestra el avatar y nombre - MODIFICADO */}
+                {/* Botón del avatar + nombre */}
                 <button
                   onClick={() => setShowMenu(!showMenu)}
                   className="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-gray-600 transition cursor-pointer"
                 >
                   {/* Avatar pequeño */}
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-300">
-                    {user.user_metadata?.avatar_url ? (
+                    {user?.user_metadata?.avatar_url ? (
                       <img
                         src={user.user_metadata.avatar_url}
                         alt="Avatar"
@@ -180,26 +183,26 @@ function NavbarDesktop() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600 text-xs font-bold">
-                        {user.user_metadata?.name?.[0]?.toUpperCase() || "U"}
+                        {user?.user_metadata?.name?.[0]?.toUpperCase() || "U"}
                       </div>
                     )}
                   </div>
 
                   {/* Texto del saludo */}
                   <span className="border-b border-gray-800">
-                    {user.user_metadata?.name
+                    {user?.user_metadata?.name
                       ? `Hola, ${user.user_metadata.name.split(" ")[0]}`
                       : "Hola, usuario"}
                   </span>
                 </button>
 
-                {/* Menú desplegable - TAMBIÉN AGREGAR AVATAR AQUÍ */}
+                {/* Menú desplegable */}
                 {showMenu && (
                   <div className="absolute right-0 mt-10 w-72 bg-white rounded-lg shadow-lg py-2 z-50">
-                    {/* Header del menú con avatar más grande */}
+                    {/* Header del menú */}
                     <div className="px-4 py-3 border-b flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300">
-                        {user.user_metadata?.avatar_url ? (
+                        {user?.user_metadata?.avatar_url ? (
                           <img
                             src={user.user_metadata.avatar_url}
                             alt="Avatar"
@@ -207,20 +210,22 @@ function NavbarDesktop() {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600 text-sm font-bold">
-                            {user.user_metadata?.name?.[0]?.toUpperCase() ||
+                            {user?.user_metadata?.name?.[0]?.toUpperCase() ||
                               "U"}
                           </div>
                         )}
                       </div>
                       <div>
                         <p className="text-sm font-semibold">
-                          {user.user_metadata?.name
+                          {user?.user_metadata?.name
                             ? `${user.user_metadata.name} ${
-                                user.user_metadata.last_name || ""
+                                user?.user_metadata?.last_name || ""
                               }`
-                            : user.email}
+                            : user?.email || "Usuario"}
                         </p>
-                        <p className="text-xs text-gray-500">{user.email}</p>
+                        <p className="text-xs text-gray-500">
+                          {user?.email || "Sin correo"}
+                        </p>
                       </div>
                     </div>
 
@@ -245,6 +250,8 @@ function NavbarDesktop() {
                     >
                       Mis pedidos
                     </Link>
+
+                    {/* Botón de cerrar sesión */}
                     <button
                       onClick={handleSignOut}
                       disabled={loggingOut}
@@ -273,7 +280,7 @@ function NavbarDesktop() {
                   </div>
                 </button>
 
-                {/* Modal de login */}
+                {/* Modales */}
                 <LoginModal
                   isOpen={showLoginModal}
                   onClose={() => setShowLoginModal(false)}
@@ -281,8 +288,11 @@ function NavbarDesktop() {
                     setShowLoginModal(false);
                     setShowRegisterModal(true);
                   }}
+                  onSwitchToForgotPassword={() => {
+                    setShowLoginModal(false);
+                    setShowForgot(true);
+                  }}
                 />
-
                 <RegisterModal
                   isOpen={showRegisterModal}
                   onClose={() => setShowRegisterModal(false)}
@@ -291,15 +301,21 @@ function NavbarDesktop() {
                     setShowLoginModal(true);
                   }}
                 />
+                <ForgotPasswordModal
+                  isOpen={showForgot}
+                  onClose={() => setShowForgot(false)}
+                  onSwitchToLogin={() => {
+                    setShowForgot(false);
+                    setShowLoginModal(true);
+                  }}
+                />
               </>
             )}
-            {/* Carrito con contador */}
+
+            {/* Carrito */}
             <Link to="/carrito" className="flex items-center justify-center">
               <div className="relative flex items-center justify-center rounded-full p-2 transition-all duration-300 cursor-pointer">
-                {/* Icono del carrito */}
                 <ShoppingCart className="w-6 h-6 text-black" />
-
-                {/* Burbuja del contador - SOLO cuando hay productos */}
                 {totalItems > 0 && (
                   <div className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold bg-red-500 text-white">
                     {totalItems}
