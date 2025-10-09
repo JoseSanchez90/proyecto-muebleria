@@ -147,7 +147,7 @@ function Home() {
   });
 
   return (
-    <main className="min-h-screen px-20 bg-gray-100 pt-8">
+    <main className="min-h-screen px-20 bg-gray-100 pt-4 2xl:pt-8">
       {/* MOSTRAR SKELETON O CAROUSEL (no ambos) */}
       {loading ? (
         // SPINNER elegante

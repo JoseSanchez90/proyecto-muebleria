@@ -138,7 +138,7 @@ function Cart() {
               {/* Botones */}
               <div className="flex flex-col gap-2">
                 <Link to="/checkout">
-                  <Button className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-full font-semibold mt-4">
+                  <Button size="lg" className="w-full cursor-pointer">
                     Proceder al pago
                   </Button>
                 </Link>

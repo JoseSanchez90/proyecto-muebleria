@@ -60,7 +60,7 @@ function MasVendidos() {
     addToCart(producto);
     
     toast.custom(() => (
-      <div className="bg-white flex items-center gap-3 p-2 rounded-2xl">
+      <div className="bg-green-200 flex items-center gap-3 p-2 rounded-2xl">
         <AnimatedShoppingBag />
         <div>
           <p className="text-sm font-semibold text-black">
