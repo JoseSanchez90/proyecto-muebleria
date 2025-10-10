@@ -128,7 +128,7 @@ function RegisterModal({
       />
 
       {/* Modal - Más compacto */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] animate-in fade-in zoom-in duration-200">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] animate-in fade-in zoom-in duration-200">
         {/* Botón cerrar */}
         <button
           onClick={onClose}
