@@ -11,7 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import departamentos from "@/data/departamentos.json";
 import provincias from "@/data/provincias.json";
 import distritos from "@/data/distritos.json";
@@ -259,7 +259,7 @@ function RegisterModal({
 
       {/* Modal - Con scroll */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] animate-in fade-in zoom-in duration-200">
-        
+
         {/* Botón cerrar */}
         <button
           onClick={onClose}

@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import LoginModal from "@/pages/loginModal";
 import RegisterModal from "@/pages/registerModal";
 import ForgotPasswordModal from "@/pages/forgotPasswordModal";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 function NavbarDesktop() {
   const { getTotalItems } = useCart();

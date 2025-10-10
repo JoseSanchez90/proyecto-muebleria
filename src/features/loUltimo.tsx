@@ -3,7 +3,7 @@ import { supabase } from "../lib/supabaseClient";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cartContext";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 interface Producto {

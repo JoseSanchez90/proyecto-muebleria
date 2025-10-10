@@ -7,7 +7,7 @@ import {
 } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/components/Authentication/authContext";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 
 interface FavoriteContextType {
   favorites: string[]; // Array de product_ids

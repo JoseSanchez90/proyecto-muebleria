@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
+import toast from "react-hot-toast";
 import { useFavorites } from "@/context/favoriteContext";
 
 interface Product {

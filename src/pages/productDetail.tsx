@@ -13,8 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import AnimatedShoppingBag from "@/assets/icons/shoppingBag";
+import toast from "react-hot-toast";
 import { useFavorites } from "@/context/favoriteContext";
 
 interface Producto {
@@ -86,22 +85,7 @@ function ProductDetail() {
       for (let i = 0; i < cantidad; i++) {
         addToCart(producto);
       }
-      toast.custom(
-        () => (
-          <div className="bg-white flex items-center gap-3 p-2 rounded-2xl">
-            <AnimatedShoppingBag />
-            <div>
-              <p className="text-sm font-semibold text-black">
-                ¡{producto.nombre}!
-              </p>
-              <p className="text-sm text-gray-600">agregado al carrito</p>
-            </div>
-          </div>
-        ),
-        {
-          duration: 2500, // milisegundos
-        }
-      );
+      toast.success(`"${producto.nombre}" agregado al carrito`);
     }
   };
 
