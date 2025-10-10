@@ -34,10 +34,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-
   useEffect(() => {
     setMounted(true);
+  }, []);
 
+  useEffect(() => {
+    if (!mounted) return;
     // Función para cargar el perfil del usuario
     const loadUserProfile = async (userId: string) => {
       try {
@@ -57,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return null;
       }
     };
-    
+
     // Función para establecer el usuario con su perfil
     const setUserWithProfile = async (session: Session | null) => {
       if (session?.user) {
@@ -101,20 +103,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initializeAuth();
 
     // 2. Escuchar cambios de autenticación
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session);
-
-      // Solo procesar si el componente está montado
-      if (!mounted) return;
-
-      await setUserWithProfile(session);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log("Auth state changed:", event);
+        await setUserWithProfile(session);
+      }
+    );
 
     return () => {
-      subscription.unsubscribe();
-      setMounted(false);
+      listener.subscription.unsubscribe();
     };
   }, [mounted]);
 
