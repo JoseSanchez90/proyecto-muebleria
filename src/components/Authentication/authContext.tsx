@@ -2,8 +2,8 @@ import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import type { User, Session } from "@supabase/supabase-js";
+import Loader from "../common/loader";
 
-// Tipado extendido para el registro con datos adicionales
 interface SignUpFormData {
   name: string;
   lastName: string;
@@ -32,89 +32,80 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // 🧠 Carga del perfil desde la tabla profiles
+  const loadUserProfile = async (userId: string) => {
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("name, last_name, avatar_url")
+        .eq("id", userId)
+        .single();
 
-  useEffect(() => {
-    if (!mounted) return;
-    // Función para cargar el perfil del usuario
-    const loadUserProfile = async (userId: string) => {
-      try {
-        const { data: profile, error } = await supabase
-          .from("profiles")
-          .select("name, last_name, avatar_url") // ← AGREGAR avatar_url aquí
-          .eq("id", userId)
-          .single();
-
-        if (error) {
-          console.error("Error loading profile:", error);
-          return null;
-        }
-        return profile;
-      } catch (error) {
-        console.error("Error in loadUserProfile:", error);
+      if (error) {
+        console.warn("No se pudo cargar perfil:", error);
         return null;
       }
-    };
+      return profile;
+    } catch (err) {
+      console.error("Error en loadUserProfile:", err);
+      return null;
+    }
+  };
 
-    // Función para establecer el usuario con su perfil
-    const setUserWithProfile = async (session: Session | null) => {
-      if (session?.user) {
-        const profile = await loadUserProfile(session.user.id);
-        const userWithMetadata = {
-          ...session.user,
-          user_metadata: {
-            ...session.user.user_metadata,
-            ...(profile || {}),
-          },
-        };
-        setUser(userWithMetadata);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    };
+  // 🧩 Combina la sesión de Supabase con los datos del perfil
+  const setUserWithProfile = async (session: Session | null) => {
+    if (session?.user) {
+      const profile = await loadUserProfile(session.user.id);
+      const userWithProfile = {
+        ...session.user,
+        user_metadata: {
+          ...session.user.user_metadata,
+          ...(profile || {}),
+        },
+      };
+      setUser(userWithProfile as User);
+    } else {
+      setUser(null);
+    }
+  };
 
-    // 1. Obtener sesión inicial
-    const initializeAuth = async () => {
+  useEffect(() => {
+    const initAuth = async () => {
       try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) console.error("Error al obtener sesión:", error);
 
-        if (error) {
-          console.error("Error getting session:", error);
-          setLoading(false);
-          return;
-        }
-
-        console.log("Initial session:", session);
+        const session = data.session;
         await setUserWithProfile(session);
-      } catch (error) {
-        console.error("Error in initializeAuth:", error);
+
+        // 🔁 Escuchar cambios de autenticación
+        const { data: listener } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log("Auth state changed:", event);
+            await setUserWithProfile(session);
+          }
+        );
+
+        // 🕒 pequeña espera para sincronizar cookie y sesión (evita "logout fantasma")
+        await new Promise((r) => setTimeout(r, 250));
+
+        setLoading(false);
+
+        return () => {
+          listener.subscription.unsubscribe();
+        };
+      } catch (err) {
+        console.error("Error inicializando AuthProvider:", err);
         setLoading(false);
       }
     };
 
-    initializeAuth();
+    initAuth();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    // 2. Escuchar cambios de autenticación
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event);
-        await setUserWithProfile(session);
-      }
-    );
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, [mounted]);
-
+  // 🔑 Iniciar sesión
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
@@ -122,19 +113,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
       });
-
-      if (error) throw error;
-
-      // La sesión se establecerá automáticamente via onAuthStateChange
-      return { error: null };
-    } catch (error) {
-      console.error("Sign in error:", error);
-      return { error: error as Error };
+      return { error: error ?? null };
+    } catch (err) {
+      return { error: err as Error };
     } finally {
       setLoading(false);
     }
   };
 
+  // 🧾 Registro
   const signUp = async (formData: SignUpFormData) => {
     try {
       setLoading(true);
@@ -154,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error ?? new Error("No se pudo crear el usuario") };
       }
 
-      // Insertar el perfil adicional
+      // Inserta el perfil adicional
       const { error: insertError } = await supabase.from("profiles").insert({
         id: data.user.id,
         name: formData.name,
@@ -167,38 +154,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         department: formData.department,
         province: formData.province,
         district: formData.district,
+        avatar_url: null,
       });
 
       if (insertError) {
-        console.error("Error al guardar el perfil:", insertError);
-        // No hagas logout aquí, deja que el usuario permanezca logueado
+        console.error("Error guardando perfil:", insertError);
         return { error: insertError };
       }
 
       return { error: null };
-    } catch (error) {
-      return { error: error as Error };
+    } catch (err) {
+      return { error: err as Error };
     } finally {
       setLoading(false);
     }
   };
 
+  // 🚪 Cerrar sesión
   const signOut = async () => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-    } catch (error) {
-      console.error("Error signing out:", error);
-      throw error;
+      setUser(null);
+    } catch (err) {
+      console.error("Error cerrando sesión:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Evitar renderizado hasta que esté montado
-  if (!mounted) {
-    return null;
+  // 🧭 Evita renderizar la app antes de tener sesión lista
+  if (loading) {
+    return <Loader />; // puedes usar tu <Loader /> aquí
   }
 
   return (
@@ -209,10 +197,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
+  if (!context) throw new Error("useAuth debe usarse dentro de un AuthProvider");
   return context;
 }

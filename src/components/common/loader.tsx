@@ -6,7 +6,7 @@ function Loader() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowContent(true);
-    }, 2000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -20,7 +20,7 @@ function Loader() {
         <div className="flex items-center justify-center gap-3">
           <img
             src="/logo.png"
-            className="w-10 h-10"
+            className="w-12 h-12"
             alt="Munfort"
           />
           <p className="font-sans font-bold text-xl">Munfort</p>

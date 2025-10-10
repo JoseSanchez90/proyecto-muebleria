@@ -4,6 +4,7 @@ import { Suspense, lazy } from "react";
 import MainLayout from "@/components/layout/mainLayout";
 import Favorites from "@/pages/favorites";
 import Orders from "@/pages/orders";
+import Loader from "@/components/common/loader";
 // import Checkout from "@/pages/checkout";
 
 // Lazy load de las páginas
@@ -42,7 +43,7 @@ const router = createBrowserRouter([
 
 export function AppRoutes() {
   return (
-    <Suspense>
+    <Suspense fallback={<Loader />}>
       <RouterProvider router={router} />
     </Suspense>
   )

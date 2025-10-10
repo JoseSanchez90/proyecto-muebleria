@@ -4,7 +4,6 @@ import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/context/cartContext";
 import { toast } from "sonner";
-import AnimatedShoppingBag from "@/assets/icons/shoppingBag";
 import { useNavigate } from "react-router-dom";
 
 interface Producto {
@@ -59,23 +58,8 @@ function LoUltimo() {
 
   const handleComprar = (producto: Producto) => {
     addToCart(producto);
-    
-    toast.custom(() => (
-      <div className="bg-white flex items-center gap-3 p-2 rounded-2xl">
-        <AnimatedShoppingBag />
-        <div>
-          <p className="text-sm font-semibold text-black">
-            ¡{producto.nombre}!
-          </p>
-          <p className="text-sm text-gray-600">
-            agregado al carrito
-          </p>
-        </div>
-      </div>
-    ),
-    {
-    duration: 2500, // milisegundos
-    });
+
+    toast.success(`"${producto.nombre}" agregado al carrito`);
   };
   
   if (loading) {

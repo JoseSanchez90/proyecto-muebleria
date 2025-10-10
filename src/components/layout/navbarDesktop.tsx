@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import LoginModal from "@/pages/loginModal";
 import RegisterModal from "@/pages/registerModal";
 import ForgotPasswordModal from "@/pages/forgotPasswordModal";
+import { toast } from "sonner";
 
 function NavbarDesktop() {
   const { getTotalItems } = useCart();
@@ -34,14 +35,13 @@ function NavbarDesktop() {
   const handleSignOut = async () => {
     setLoggingOut(true);
     try {
-      await signOut(); // Esto ya limpia la sesión en Supabase
-
       await clearCart();
-
-      // Redirigir con React Router (sin recargar toda la app)
-      navigate("/"); // ← Usa useNavigate() de react-router-dom
+      await signOut();
+      toast.success("Sesión cerrada correctamente.");
+      navigate("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+      toast.error("Hubo un problema al cerrar sesión.");
     } finally {
       setLoggingOut(false);
       setShowMenu(false);
