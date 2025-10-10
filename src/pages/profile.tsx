@@ -1,5 +1,3 @@
-// src/pages/Profile.tsx
-import { useState, useEffect } from "react";
 import { useAuth } from "@/components/Authentication/authContext";
 import { supabase } from "@/lib/supabaseClient";
 import { Camera, MapPin, Package, Save, User } from "lucide-react";
@@ -17,29 +15,12 @@ import departamentos from "@/data/departamentos.json";
 import provincias from "@/data/provincias.json";
 import distritos from "@/data/distritos.json";
 
-interface UserProfile {
-  id: string;
-  name: string;
-  last_name: string;
-  email: string;
-  phone: string;
-  dni: string;
-  birthdate: string;
-  address: string;
-  reference: string;
-  department: string;
-  province: string;
-  district: string;
-  avatar_url: string | null;
-}
-
-interface Order {
-  id: string;
-  created_at: string;
-  total: number;
-  status: string;
-  items_count: number;
-}
+import {
+  useProfile,
+  type UserProfile as ProfileType,
+} from "@/hooks/useProfile";
+import { useOrders, type Order } from "@/hooks/useOrders";
+import { useState, useEffect, useMemo } from "react";
 
 interface Provincia {
   id: string;
@@ -54,7 +35,6 @@ interface Distrito {
 }
 
 function Profile() {
-  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"personal" | "address" | "orders">(
     "personal"
   );
@@ -65,88 +45,47 @@ function Profile() {
   );
   const [distritosFiltrados, setDistritosFiltrados] = useState<Distrito[]>([]);
 
-  // Estado para información personal
-  const [profile, setProfile] = useState<UserProfile>({
-    id: "",
-    name: "",
-    last_name: "",
-    email: "",
-    phone: "",
-    dni: "",
-    birthdate: "",
-    address: "",
-    reference: "",
-    department: "",
-    province: "",
-    district: "",
-    avatar_url: null,
-  });
+  const { user } = useAuth();
+  const userId = useMemo(() => user?.id, [user?.id]);
 
-  // Estado para pedidos
-  const [orders, setOrders] = useState<Order[]>([]);
+  // ✅ REACT QUERY PARA DATOS
+  const {
+    data: profileData,
+    isLoading: profileLoading,
+    error: profileError,
+    refetch: refetchProfile,
+  } = useProfile(userId);
 
+  const { data: orders, isLoading: ordersLoading } = useOrders(userId);
+
+  // ✅ UN SOLO ESTADO PARA FORMULARIOS - INICIALIZAR CON DATOS DE REACT QUERY
+  const [formData, setFormData] = useState<Partial<ProfileType>>({});
+
+  // ✅ SINCRONIZAR FORM DATA CON DATOS DEL PERFIL
   useEffect(() => {
-    if (user) {
-      loadProfile();
-      loadOrders();
-    } else {
-      window.location.href = "/";
+    if (profileData) {
+      console.log("✅ Sincronizando formData con profileData:", profileData);
+      setFormData({
+        name: profileData.name || "",
+        last_name: profileData.last_name || "",
+        phone: profileData.phone || "",
+        dni: profileData.dni || "",
+        birthdate: profileData.birthdate || "",
+        address: profileData.address || "",
+        reference: profileData.reference || "",
+        department: profileData.department || "",
+        province: profileData.province || "",
+        district: profileData.district || "",
+        avatar_url: profileData.avatar_url,
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user]);
+  }, [profileData]);
 
-  const loadProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user?.id)
-        .single();
-
-      if (error) throw error;
-      if (data) {
-        setProfile({
-          id: data.id,
-          name: data.name || "",
-          last_name: data.last_name || "",
-          email: user?.email || "",
-          phone: data.phone || "",
-          dni: data.dni || "",
-          birthdate: data.birthdate || "",
-          address: data.address || "",
-          reference: data.reference || "",
-          department: data.department || "",
-          province: data.province || "",
-          district: data.district || "",
-          avatar_url: data.avatar_url,
-        });
-      }
-    } catch (error) {
-      console.error("Error al cargar perfil:", error);
-      toast.error("Error al cargar el perfil");
-    }
-  };
-
-  const loadOrders = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("user_id", user?.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setOrders(data || []);
-    } catch (error) {
-      console.error("Error al cargar pedidos:", error);
-    }
-  };
-
-  // USEEFFECT PARA FILTRADO
+  // ✅ USEEFFECT PARA FILTRADO - USAR formData
   useEffect(() => {
-    if (profile.department) {
-      const filtradas = provincias // ← Array completo de provincias
-        .filter((prov) => prov.department_id === profile.department)
+    if (formData.department) {
+      const filtradas = provincias
+        .filter((prov) => prov.department_id === formData.department)
         .map((prov) => ({
           id: prov.id,
           nombre: prov.name,
@@ -156,12 +95,12 @@ function Profile() {
     } else {
       setProvinciasFiltradas([]);
     }
-  }, [profile.department]);
+  }, [formData.department]);
 
   useEffect(() => {
-    if (profile.province) {
-      const filtradas = distritos // ← Array completo de distritos
-        .filter((dist) => dist.province_id === profile.province)
+    if (formData.province) {
+      const filtradas = distritos
+        .filter((dist) => dist.province_id === formData.province)
         .map((dist) => ({
           id: dist.id,
           nombre: dist.name,
@@ -171,72 +110,92 @@ function Profile() {
     } else {
       setDistritosFiltrados([]);
     }
-  }, [profile.province]);
+  }, [formData.province]);
 
-  // Usar profile.avatar_url en lugar de user.user_metadata
-  const avatarSrc = profile.avatar_url
-    ? profile.avatar_url
-    : "/default-avatar.png";
+  // ✅ REDIRIGIR SI NO HAY USUARIO
+  useEffect(() => {
+    if (!user) {
+      const timer = setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [user]);
+
+  // ✅ ESTADOS DE CARGA
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando perfil...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (profileError || !profileData) {
+    return (
+      <div className="min-h-screen bg-gray-100 pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">Error al cargar el perfil</p>
+          <Button onClick={() => refetchProfile()}>Reintentar</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-100 pt-16 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">No se pudo cargar el perfil</p>
+          <Button onClick={() => window.location.reload()}>Reintentar</Button>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ AVATAR SRC - USAR formData
+  const avatarSrc = formData.avatar_url || "/default-avatar.png";
 
   const uploadAvatar = async (file: File) => {
     try {
       setUploading(true);
 
-      // Obtener usuario actual
       const {
         data: { user: currentUser },
       } = await supabase.auth.getUser();
       if (!currentUser) throw new Error("Usuario no autenticado");
 
-      // Generar nombre único para el archivo
       const fileExt = file.name.split(".").pop();
       const fileName = `${currentUser.id}/avatar-${Date.now()}.${fileExt}`;
 
-      console.log("Subiendo archivo:", fileName);
-
-      // CAMBIO 1: Cambiar "profile" por "avatars"
       const { error: uploadError } = await supabase.storage
-        .from("avatars") // ← CAMBIADO A "avatars"
+        .from("avatars")
         .upload(fileName, file, {
           cacheControl: "3600",
           upsert: true,
         });
 
-      if (uploadError) {
-        console.error("Error subiendo archivo:", uploadError);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // CAMBIO 2: Cambiar "profile" por "avatars"
       const {
         data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(fileName); // ← CAMBIADO A "avatars"
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
 
-      console.log("URL pública obtenida:", publicUrl);
-
-      // 3. ACTUALIZAR tabla profiles (esto NO cambia)
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({
-          avatar_url: publicUrl,
-        })
+        .update({ avatar_url: publicUrl })
         .eq("id", currentUser.id);
 
-      if (updateError) {
-        console.error("Error actualizando perfil:", updateError);
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
-      console.log("Avatar actualizado exitosamente");
-
-      // Actualizar el estado local
-      setProfile((prev) => ({
-        ...prev,
-        avatar_url: publicUrl,
-      }));
+      // ✅ ACTUALIZAR formData Y REFRESCAR REACT QUERY
+      setFormData((prev) => ({ ...prev, avatar_url: publicUrl }));
+      await refetchProfile();
 
       toast.success("Foto de perfil actualizada exitosamente");
-      return { error: null, publicUrl };
     } catch (error) {
       console.error("Error en uploadAvatar:", error);
       toast.error(
@@ -244,7 +203,6 @@ function Profile() {
           error instanceof Error ? error.message : "Error desconocido"
         }`
       );
-      return { error: error as Error, publicUrl: null };
     } finally {
       setUploading(false);
     }
@@ -256,66 +214,43 @@ function Profile() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validar tipo de archivo
     if (!file.type.startsWith("image/")) {
       toast.error("Por favor selecciona una imagen válida");
       return;
     }
 
-    // Validar tamaño (ej: máximo 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast.error("La imagen debe ser menor a 2MB");
       return;
     }
 
-    // CORREGIDO: Eliminado el setAvatarUrl que no existe
     await uploadAvatar(file);
   };
 
   const handleSaveProfile = async () => {
     try {
       setLoading(true);
-      console.log("🔄 Actualizando perfil...", {
-        userId: user?.id,
-        data: {
-          name: profile.name,
-          last_name: profile.last_name,
-          phone: profile.phone,
-          dni: profile.dni,
-          birthdate: profile.birthdate,
-        },
-      });
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update({
-          name: profile.name,
-          last_name: profile.last_name,
-          phone: profile.phone,
-          dni: profile.dni,
-          birthdate: profile.birthdate,
+          name: formData.name,
+          last_name: formData.last_name,
+          phone: formData.phone,
+          dni: formData.dni,
+          birthdate: formData.birthdate,
         })
-        .eq("id", user?.id)
-        .select();
+        .eq("id", user?.id);
 
-      console.log("✅ Resultado update:", data);
-      console.log("❌ Error update:", error);
+      if (error) throw error;
 
-      // CORREGIDO: Solo lanzar error si realmente hay error
-      if (error) {
-        console.error("Error al guardar perfil:", error);
-        throw error;
-      }
-
-      // Si llegamos aquí, la actualización fue exitosa
-      console.log("✅ Perfil actualizado correctamente en la base de datos");
+      await refetchProfile();
       toast.success("Perfil actualizado correctamente");
     } catch (error) {
       console.error("Error en handleSaveProfile:", error);
       toast.error("Error al actualizar el perfil");
     } finally {
       setLoading(false);
-      console.log("🏁 Finalizado handleSaveProfile");
     }
   };
 
@@ -323,23 +258,20 @@ function Profile() {
     try {
       setLoading(true);
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("profiles")
         .update({
-          address: profile.address,
-          reference: profile.reference,
-          department: profile.department,
-          province: profile.province,
-          district: profile.district,
+          address: formData.address,
+          reference: formData.reference,
+          department: formData.department,
+          province: formData.province,
+          district: formData.district,
         })
-        .eq("id", user?.id)
-        .select(); // ← Agregar para ver el resultado
-
-      console.log("✅ Dirección actualizada:", data);
-      console.log("❌ Error dirección:", error);
+        .eq("id", user?.id);
 
       if (error) throw error;
 
+      await refetchProfile();
       toast.success("Dirección actualizada correctamente");
     } catch (error) {
       console.error("Error al guardar dirección:", error);
@@ -349,6 +281,7 @@ function Profile() {
     }
   };
 
+  // ✅ JSX ACTUALIZADO - USAR formData EN LUGAR DE profile
   return (
     <div className="min-h-screen bg-gray-100 pt-16">
       <div className="container mx-auto px-4 max-w-6xl">
@@ -358,7 +291,7 @@ function Profile() {
             {/* Avatar */}
             <div className="relative">
               <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden border-4 border-gray-100">
-                {profile.avatar_url ? (
+                {formData.avatar_url ? (
                   <img
                     src={avatarSrc}
                     alt="Avatar"
@@ -366,8 +299,8 @@ function Profile() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-gray-400 bg-gradient-to-br from-gray-200 to-gray-300">
-                    {profile.name?.[0]?.toUpperCase() || "U"}
-                    {profile.last_name?.[0]?.toUpperCase() || ""}
+                    {formData.name?.[0]?.toUpperCase() || "U"}
+                    {formData.last_name?.[0]?.toUpperCase() || ""}
                   </div>
                 )}
               </div>
@@ -393,14 +326,16 @@ function Profile() {
               </label>
             </div>
 
-            {/* Info */}
+            {/* Info - USAR formData */}
             <div>
               <h1 className="text-3xl font-bold mb-2">
-                {profile.name || "Usuario"} {profile.last_name}
+                {formData.name || "Usuario"} {formData.last_name}
               </h1>
-              <p className="text-gray-600">{profile.email}</p>
-              {profile.dni && (
-                <p className="text-sm text-gray-500 mt-1">DNI: {profile.dni}</p>
+              <p className="text-gray-600">{user?.email}</p>
+              {formData.dni && (
+                <p className="text-sm text-gray-500 mt-1">
+                  DNI: {formData.dni}
+                </p>
               )}
             </div>
           </div>
@@ -417,8 +352,7 @@ function Profile() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              <User className="w-5 h-5" />
-              Información Personal
+              <User className="w-5 h-5" /> Información Personal
             </button>
             <button
               onClick={() => setActiveTab("address")}
@@ -428,8 +362,7 @@ function Profile() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              <MapPin className="w-5 h-5" />
-              Dirección de Envío
+              <MapPin className="w-5 h-5" /> Dirección de Envío
             </button>
             <button
               onClick={() => setActiveTab("orders")}
@@ -439,14 +372,12 @@ function Profile() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              <Package className="w-5 h-5" />
-              Historial de Pedidos
+              <Package className="w-5 h-5" /> Historial de Pedidos
             </button>
           </div>
 
-          {/* Contenido de tabs */}
           <div className="p-8">
-            {/* Información Personal */}
+            {/* Información Personal - USAR formData */}
             {activeTab === "personal" && (
               <div className="space-y-6">
                 <h3 className="text-xl font-semibold mb-4">Datos personales</h3>
@@ -456,9 +387,9 @@ function Profile() {
                       Nombre *
                     </label>
                     <Input
-                      value={profile.name}
+                      value={formData.name || ""}
                       onChange={(e) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           name: e.target.value,
                         }))
@@ -471,9 +402,9 @@ function Profile() {
                       Apellido *
                     </label>
                     <Input
-                      value={profile.last_name}
+                      value={formData.last_name || ""}
                       onChange={(e) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           last_name: e.target.value,
                         }))
@@ -486,9 +417,12 @@ function Profile() {
                       DNI
                     </label>
                     <Input
-                      value={profile.dni}
+                      value={formData.dni || ""}
                       onChange={(e) =>
-                        setProfile((prev) => ({ ...prev, dni: e.target.value }))
+                        setFormData((prev) => ({
+                          ...prev,
+                          dni: e.target.value,
+                        }))
                       }
                       placeholder="12345678"
                       maxLength={8}
@@ -499,9 +433,9 @@ function Profile() {
                       Teléfono
                     </label>
                     <Input
-                      value={profile.phone}
+                      value={formData.phone || ""}
                       onChange={(e) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           phone: e.target.value,
                         }))
@@ -514,7 +448,7 @@ function Profile() {
                       Correo electrónico
                     </label>
                     <Input
-                      value={profile.email}
+                      value={user?.email || ""}
                       disabled
                       className="bg-gray-50"
                     />
@@ -525,9 +459,9 @@ function Profile() {
                     </label>
                     <Input
                       type="date"
-                      value={profile.birthdate}
+                      value={formData.birthdate || ""}
                       onChange={(e) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           birthdate: e.target.value,
                         }))
@@ -540,7 +474,7 @@ function Profile() {
                   disabled={loading}
                   className="bg-black hover:bg-gray-800 cursor-pointer"
                 >
-                  <Save className="w-4 h-4 mr-2" />
+                  <Save className="w-4 h-4 mr-2" />{" "}
                   {loading ? "Guardando..." : "Guardar Cambios"}
                 </Button>
               </div>
@@ -558,9 +492,9 @@ function Profile() {
                       Dirección completa
                     </label>
                     <Input
-                      value={profile.address}
+                      value={formData.address}
                       onChange={(e) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           address: e.target.value,
                         }))
@@ -573,9 +507,9 @@ function Profile() {
                       Referencia
                     </label>
                     <Input
-                      value={profile.reference}
+                      value={formData.reference}
                       onChange={(e) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           reference: e.target.value,
                         }))
@@ -588,9 +522,9 @@ function Profile() {
                       Departamento
                     </label>
                     <Select
-                      value={profile.department}
+                      value={formData.department}
                       onValueChange={(value) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           department: value,
                           province: "", // Limpiar provincia
@@ -615,20 +549,20 @@ function Profile() {
                       Provincia
                     </label>
                     <Select
-                      value={profile.province}
+                      value={formData.province}
                       onValueChange={(value) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           province: value,
                           district: "", // Limpiar distrito
                         }))
                       }
-                      disabled={!profile.department}
+                      disabled={!formData.department}
                     >
                       <SelectTrigger>
                         <SelectValue
                           placeholder={
-                            profile.department
+                            formData.department
                               ? "Selecciona provincia"
                               : "Primero selecciona departamento"
                           }
@@ -648,19 +582,19 @@ function Profile() {
                       Distrito
                     </label>
                     <Select
-                      value={profile.district}
+                      value={formData.district}
                       onValueChange={(value) =>
-                        setProfile((prev) => ({
+                        setFormData((prev) => ({
                           ...prev,
                           district: value,
                         }))
                       }
-                      disabled={!profile.province}
+                      disabled={!formData.province}
                     >
                       <SelectTrigger>
                         <SelectValue
                           placeholder={
-                            profile.province
+                            formData.province
                               ? "Selecciona distrito"
                               : "Primero selecciona provincia"
                           }
@@ -678,22 +612,22 @@ function Profile() {
                 </div>
 
                 {/* Vista previa */}
-                {(profile.address || profile.department) && (
+                {(formData.address || formData.department) && (
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                     <p className="text-sm font-semibold text-gray-700 mb-2">
                       Vista previa:
                     </p>
                     <p className="text-gray-800">
-                      {profile.address || "Sin dirección"}
+                      {formData.address || "Sin dirección"}
                     </p>
                     <p className="text-sm text-gray-600 mt-1">
-                      {[profile.district, profile.province, profile.department]
+                      {[formData.district, formData.province, formData.department]
                         .filter(Boolean)
                         .join(", ")}
                     </p>
-                    {profile.reference && (
+                    {formData.reference && (
                       <p className="text-sm text-gray-500 mt-1">
-                        Ref: {profile.reference}
+                        Ref: {formData.reference}
                       </p>
                     )}
                   </div>
@@ -715,7 +649,12 @@ function Profile() {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold mb-4">Mis pedidos</h3>
 
-                {orders.length === 0 ? (
+                {ordersLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
+                    <p className="text-gray-500">Cargando pedidos...</p>
+                  </div>
+                ) : !orders || orders.length === 0 ? ( // ✅ FIX: Verificar si es undefined o vacío
                   <div className="text-center py-12">
                     <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500 text-lg mb-2">
@@ -727,54 +666,60 @@ function Profile() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order) => (
-                      <div
-                        key={order.id}
-                        className="border rounded-lg p-6 hover:shadow-md transition"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="font-semibold text-lg">
-                              Pedido #{order.id.slice(0, 8).toUpperCase()}
-                            </p>
+                    {orders.map(
+                      (
+                        order: Order // ✅ FIX: Tipar explícitamente
+                      ) => (
+                        <div
+                          key={order.id}
+                          className="border rounded-lg p-6 hover:shadow-md transition"
+                        >
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <p className="font-semibold text-lg">
+                                Pedido #{order.id.slice(0, 8).toUpperCase()}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                {new Date(order.created_at).toLocaleDateString(
+                                  "es-PE",
+                                  {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  }
+                                )}
+                              </p>
+                            </div>
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                order.status === "completed"
+                                  ? "bg-green-100 text-green-700"
+                                  : order.status === "processing"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                              }`}
+                            >
+                              {order.status === "completed"
+                                ? "Completado"
+                                : order.status === "processing"
+                                ? "En proceso"
+                                : "Pendiente"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-end">
                             <p className="text-sm text-gray-600">
-                              {new Date(order.created_at).toLocaleDateString(
-                                "es-PE",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }
-                              )}
+                              {order.items_count}{" "}
+                              {order.items_count === 1
+                                ? "producto"
+                                : "productos"}
+                            </p>
+                            <p className="text-2xl font-bold">
+                              S/ {order.total.toFixed(2)}
                             </p>
                           </div>
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              order.status === "completed"
-                                ? "bg-green-100 text-green-700"
-                                : order.status === "processing"
-                                ? "bg-blue-100 text-blue-700"
-                                : "bg-yellow-100 text-yellow-700"
-                            }`}
-                          >
-                            {order.status === "completed"
-                              ? "Completado"
-                              : order.status === "processing"
-                              ? "En proceso"
-                              : "Pendiente"}
-                          </span>
                         </div>
-                        <div className="flex justify-between items-end">
-                          <p className="text-sm text-gray-600">
-                            {order.items_count}{" "}
-                            {order.items_count === 1 ? "producto" : "productos"}
-                          </p>
-                          <p className="text-2xl font-bold">
-                            S/ {order.total.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 )}
               </div>

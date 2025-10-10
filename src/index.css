@@ -118,3 +118,34 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Slide desde la derecha - muy suave */
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-right {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.animate-custom-enter {
+  animation: slide-in-right 0.5s ease-out forwards;
+}
+
+.animate-custom-leave {
+  animation: slide-out-right 0.4s ease-in forwards;
+}

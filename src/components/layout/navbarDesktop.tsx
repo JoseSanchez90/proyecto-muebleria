@@ -10,25 +10,32 @@ import { IMAGES } from "@/assets/images";
 import { CategoryMenuItem } from "../common/categoryMenuItem";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, ShoppingCart, User } from "lucide-react";
-import { useCart } from "@/context/cartContext";
 import { useAuth } from "../Authentication/authContext";
 import { useEffect, useRef, useState } from "react";
 import LoginModal from "@/pages/loginModal";
 import RegisterModal from "@/pages/registerModal";
 import ForgotPasswordModal from "@/pages/forgotPasswordModal";
 import toast from "react-hot-toast";
+import { useCartCount } from "@/hooks/cart/useCartCount";
+import { useCart } from "@/hooks/cart/useCart";
+import { useProfile } from "@/hooks/useProfile";
 
 function NavbarDesktop() {
-  const { getTotalItems } = useCart();
   const { user, signOut } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const totalItems = getTotalItems();
   const menuRef = useRef<HTMLDivElement>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const navigate = useNavigate();
+  const { isLoading } = useCart();
+
+  // USAR REACT QUERY PARA ITEMS DEL CARRITO
+  const { data: totalItems = 0 } = useCartCount();
+  // USAR REACT QUERY PARA DATOS DEL PERFIL
+  const { data: profileData } = useProfile(user?.id);
+
   const { clearCart } = useCart();
 
   // Cerrar sesión
@@ -59,6 +66,13 @@ function NavbarDesktop() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // ✅ DATOS PARA MOSTRAR EN EL NAVBAR
+  const userName = profileData?.name || user?.user_metadata?.name || "";
+  const userLastName =
+    profileData?.last_name || user?.user_metadata?.last_name || "";
+  const userAvatar = profileData?.avatar_url || user?.user_metadata?.avatar_url;
+  const userEmail = user?.email || "";
 
   return (
     <section className="hidden lg:flex w-full h-full justify-center pt-6 xl:px-20 2xl:px-40 bg-gray-100">
@@ -173,25 +187,25 @@ function NavbarDesktop() {
                   onClick={() => setShowMenu(!showMenu)}
                   className="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-gray-600 transition cursor-pointer"
                 >
-                  {/* Avatar pequeño */}
+                  {/* ✅ Avatar pequeño - USAR DATOS DE REACT QUERY */}
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-300">
-                    {user?.user_metadata?.avatar_url ? (
+                    {userAvatar ? (
                       <img
-                        src={user.user_metadata.avatar_url}
+                        src={userAvatar}
                         alt="Avatar"
                         className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600 text-xs font-bold">
-                        {user?.user_metadata?.name?.[0]?.toUpperCase() || "U"}
+                        {userName?.[0]?.toUpperCase() || "U"}
                       </div>
                     )}
                   </div>
 
-                  {/* Texto del saludo */}
+                  {/* ✅ Texto del saludo - USAR DATOS DE REACT QUERY */}
                   <span className="border-b border-gray-800">
-                    {user?.user_metadata?.name
-                      ? `Hola, ${user.user_metadata.name.split(" ")[0]}`
+                    {userName
+                      ? `Hola, ${userName.split(" ")[0]}`
                       : "Hola, usuario"}
                   </span>
                 </button>
@@ -199,32 +213,31 @@ function NavbarDesktop() {
                 {/* Menú desplegable */}
                 {showMenu && (
                   <div className="absolute right-0 mt-10 w-72 bg-white rounded-lg shadow-lg py-2 z-50">
-                    {/* Header del menú */}
+                    {/* ✅ Header del menú - USAR DATOS DE REACT QUERY */}
                     <div className="px-4 py-3 border-b flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300">
-                        {user?.user_metadata?.avatar_url ? (
+                        {userAvatar ? (
                           <img
-                            src={user.user_metadata.avatar_url}
+                            src={userAvatar}
                             alt="Avatar"
                             className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-600 text-sm font-bold">
-                            {user?.user_metadata?.name?.[0]?.toUpperCase() ||
-                              "U"}
+                            {userName?.[0]?.toUpperCase() || "U"}
                           </div>
                         )}
                       </div>
                       <div>
                         <p className="text-sm font-semibold">
-                          {user?.user_metadata?.name
-                            ? `${user.user_metadata.name} ${
-                                user?.user_metadata?.last_name || ""
-                              }`
-                            : user?.email || "Usuario"}
+                          {userName && userLastName
+                            ? `${userName} ${userLastName}`
+                            : userName
+                            ? userName
+                            : userEmail || "Usuario"}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {user?.email || "Sin correo"}
+                          {userEmail || "Sin correo"}
                         </p>
                       </div>
                     </div>
@@ -313,15 +326,13 @@ function NavbarDesktop() {
             )}
 
             {/* Carrito */}
-            <Link to="/carrito" className="flex items-center justify-center">
-              <div className="relative flex items-center justify-center rounded-full p-2 transition-all duration-300 cursor-pointer">
-                <ShoppingCart className="w-6 h-6 text-black" />
-                {totalItems > 0 && (
-                  <div className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold bg-red-500 text-white">
-                    {totalItems}
-                  </div>
-                )}
-              </div>
+            <Link to="/carrito" className="relative">
+              <ShoppingCart className="w-6 h-6" />
+              {!isLoading && totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
+                  {totalItems}
+                </span>
+              )}
             </Link>
           </div>
         </div>

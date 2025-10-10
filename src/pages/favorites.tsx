@@ -1,32 +1,35 @@
 import { useEffect, useState } from "react";
-
 import { useAuth } from "@/components/Authentication/authContext";
-import { useCart } from "@/context/cartContext";
+import { useCart } from "@/hooks/cart/useCart";
 import { supabase } from "@/lib/supabaseClient";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useFavorites } from "@/context/favoriteContext";
+import { useFavorites } from "@/hooks/favorites/useFavorites"; // 
 
 interface Product {
   id: string;
   nombre: string;
-  descripcion: string; // ← Cambiar a descripcion
+  descripcion: string;
   precio: number;
   imagen_url: string;
   categoria: string;
-  stock: number; // ← Agregar stock
+  stock: number;
 }
 
 function Favorites() {
   const { user } = useAuth();
   const { addToCart } = useCart();
+
+  // ✅ Usar el nuevo hook useFavorites
   const {
     favorites,
-    removeFavorite,
-    loading: favoritesLoading,
+    toggleFavorite,
+    isLoading: favoritesLoading,
+    isRemoving,
   } = useFavorites();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,6 +51,7 @@ function Favorites() {
       setProducts(data || []);
     } catch (error) {
       console.error("Error cargando productos favoritos:", error);
+      toast.error("Error al cargar productos favoritos");
     } finally {
       setLoading(false);
     }
@@ -55,12 +59,11 @@ function Favorites() {
 
   useEffect(() => {
     loadFavoriteProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favorites]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [favorites]); // ✅ Dependencia correcta
 
   // Manejar agregar al carrito
   const handleAddToCart = (product: Product) => {
-    // Crear un CartItem (que incluye quantity) basado en el Product
     const cartItem = {
       id: product.id,
       nombre: product.nombre,
@@ -69,17 +72,19 @@ function Favorites() {
       imagen_url: product.imagen_url,
       categoria: product.categoria,
       stock: product.stock,
-      quantity: 1, // quantity es parte de CartItem, no de Producto
+      quantity: 1,
     };
 
     addToCart(cartItem);
-    toast.success("Producto agregado al carrito");
+    toast("Producto agregado al carrito", {
+      icon: "🛒"
+    });
   };
 
-  // Manejar quitar de favoritos
-  const handleRemoveFavorite = async (productId: string) => {
-    await removeFavorite(productId);
-    toast.success("Producto removido de favoritos");
+  // ✅ Manejar toggle de favoritos (opcional - más eficiente)
+  const handleToggleFavorite = (productId: string) => {
+    toggleFavorite(productId);
+    // Los toasts se manejan automáticamente en el hook
   };
 
   // Redirigir si no está logueado
@@ -94,9 +99,7 @@ function Favorites() {
               Inicia sesión para ver tus favoritos
             </p>
             <Link to="/">
-              <Button className="cursor-pointer">
-                Iniciar Sesión
-              </Button>
+              <Button className="cursor-pointer">Iniciar Sesión</Button>
             </Link>
           </div>
         </div>
@@ -104,6 +107,7 @@ function Favorites() {
     );
   }
 
+  // ✅ Usar favoritesLoading del hook
   if (favoritesLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-100 py-12 px-4">
@@ -140,7 +144,9 @@ function Favorites() {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4">
       <div className="max-w-5xl 2xl:max-w-7xl mx-auto">
-        <h1 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">Mis Favoritos</h1>
+        <h1 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
+          Mis Favoritos
+        </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6">
           {products.map((product) => (
@@ -157,12 +163,18 @@ function Favorites() {
                     className="w-full h-full object-cover"
                   />
 
-                  {/* Botón de corazón */}
+                  {/* ✅ Botón de corazón - actualizado */}
                   <button
-                    onClick={() => handleRemoveFavorite(product.id)}
-                    className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-black transition-colors shadow-md cursor-pointer"
+                    onClick={() => handleToggleFavorite(product.id)}
+                    disabled={isRemoving}
+                    className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-black transition-colors shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                    {isRemoving && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                      </div>
+                    )}
                   </button>
                 </div>
 

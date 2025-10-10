@@ -1,6 +1,6 @@
 // src/components/LoginModal.tsx
 import { useState, useEffect } from "react";
-import { useAuth } from "@/components/Authentication/authContext";
+import { useAuthActions } from "@/hooks/auth/useAuthActions";
 import { X, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ function LoginModal({
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, isSigningIn } = useAuthActions();
 
   // Cargar credenciales guardadas cuando abre el modal
   useEffect(() => {
@@ -58,7 +58,15 @@ function LoginModal({
       rememberMe,
     });
 
-    const { error } = await signIn(email, password);
+    signIn(
+      { email, password },
+      {
+        onSuccess: () => {
+          onClose();
+          // Reset form
+        },
+      }
+    );
 
     if (error) {
       setError("Correo o contraseña incorrectos");
@@ -193,7 +201,7 @@ function LoginModal({
 
             <Button
               type="submit"
-              disabled={loading}
+              disabled={isSigningIn}
               className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-semibold cursor-pointer disabled:opacity-70"
             >
               {loading ? (
@@ -224,7 +232,7 @@ function LoginModal({
               onClose();
               onSwitchToRegister();
             }}
-            className="w-full border-2 bg-white border-black hover:bg-gray-100 text-black rounded-lg font-semibold transition cursor-pointer"
+            className="w-full border bg-white border-black hover:bg-gray-100 text-black rounded-lg font-semibold transition cursor-pointer"
           >
             Crear cuenta nueva
           </Button>

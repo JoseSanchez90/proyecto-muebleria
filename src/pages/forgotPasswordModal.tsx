@@ -50,7 +50,7 @@ export default function ForgotPasswordModal({
         {/* Botón cerrar */}
         <button
           onClick={onClose}
-          className="sticky top-4 right-4 ml-auto p-2 hover:bg-gray-100 rounded-full transition cursor-pointer z-10 float-right"
+          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -104,9 +104,9 @@ export default function ForgotPasswordModal({
             </form>
           ) : (
             <div className="space-y-6 pt-4 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <div className="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center mx-auto">
                 <svg
-                  className="w-8 h-8 text-green-600"
+                  className="w-8 h-8 text-green-700"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -132,7 +132,7 @@ export default function ForgotPasswordModal({
 
               <Button
                 onClick={handleClose}
-                className="w-full h-12 bg-gray-800 hover:bg-gray-900 text-white font-medium"
+                className="w-full cursor-pointer"
               >
                 Entendido
               </Button>

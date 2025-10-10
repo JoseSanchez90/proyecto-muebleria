@@ -1,10 +1,8 @@
 // src/pages/ProductDetail.tsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { supabase } from "../lib/supabaseClient";
 import { ShoppingCart, Heart, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/context/cartContext";
 import {
   Select,
   SelectContent,
@@ -14,82 +12,50 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import toast from "react-hot-toast";
-import { useFavorites } from "@/context/favoriteContext";
+import { useFavorites } from "@/hooks/favorites/useFavorites";
 
-interface Producto {
-  id: string;
-  nombre: string;
-  descripcion: string;
-  precio: number;
-  imagen_url: string;
-  categoria: string;
-  stock: number;
-  mas_vendido?: boolean;
-  nuevo?: boolean;
-}
+// ✅ IMPORTAR HOOKS DE REACT QUERY
+import { useCart } from '@/hooks/cart/useCart';
+import { useProductDetail } from '@/hooks/products/useProductDetail';
+import { useRelatedProducts } from '@/hooks/products/useRelatedProducts';
 
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const [producto, setProducto] = useState<Producto | null>(null);
-  const [productosRelacionados, setProductosRelacionados] = useState<
-    Producto[]
-  >([]);
-  const [loading, setLoading] = useState(true);
   const [cantidad, setCantidad] = useState(1);
-  const { addToCart } = useCart();
-  const { toggleFavorite, isFavorite } = useFavorites();
-  const [toggling] = useState<string | null>(null);
+  const { toggleFavorite, isFavorite, isToggling } = useFavorites();
+  
+  // ✅ REACT QUERY PARA DATOS
+  const { 
+    data: producto, 
+    isLoading, 
+    error 
+  } = useProductDetail(id);
+  
+  const { 
+    data: productosRelacionados = [] 
+  } = useRelatedProducts(producto?.categoria, id);
 
-  useEffect(() => {
-    if (id) {
-      loadProducto();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  // ✅ HOOKS DE CARRITO Y FAVORITOS
+  const { addToCart, isAdding } = useCart();
 
-  const loadProducto = async () => {
-    try {
-      setLoading(true);
-
-      // Cargar producto principal
-      const { data: productoData, error: productoError } = await supabase
-        .from("productos")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (productoError) throw productoError;
-
-      setProducto(productoData);
-
-      // Cargar productos relacionados de la misma categoría
-      if (productoData) {
-        const { data: relacionados } = await supabase
-          .from("productos")
-          .select("*")
-          .eq("categoria", productoData.categoria)
-          .neq("id", id)
-          .limit(4);
-
-        setProductosRelacionados(relacionados || []);
-      }
-    } catch (error) {
-      console.error("Error al cargar producto:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (producto) {
-      for (let i = 0; i < cantidad; i++) {
-        addToCart(producto);
+      try {
+        // ✅ Agregar la cantidad especificada
+        for (let i = 0; i < cantidad; i++) {
+          await addToCart(producto);
+        }
+        toast.success(`"${producto.nombre}" agregado al carrito`);
+        setCantidad(1); // Resetear cantidad después de agregar
+      } catch (error) {
+        console.log(error)
+        toast.error("Error al agregar al carrito");
       }
-      toast.success(`"${producto.nombre}" agregado al carrito`);
     }
   };
 
-  if (loading) {
+  // ✅ MANEJAR CARGANDO
+  if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
@@ -97,11 +63,14 @@ function ProductDetail() {
     );
   }
 
-  if (!producto) {
+  // ✅ MANEJAR ERROR O PRODUCTO NO ENCONTRADO
+  if (error || !producto) {
     return (
       <main className="min-h-screen flex items-center justify-center pt-8 bg-gray-100">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Producto no encontrado</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            {error ? "Error al cargar producto" : "Producto no encontrado"}
+          </h1>
           <Link to="/" className="text-blue-600 hover:underline">
             Volver al inicio
           </Link>
@@ -145,7 +114,7 @@ function ProductDetail() {
                 />
               </div>
 
-              {/* Miniaturas (puedes agregar más imágenes aquí) */}
+              {/* Miniaturas */}
               <div className="grid grid-cols-4 gap-4">
                 {[1, 2, 3, 4].map((i) => (
                   <div
@@ -174,7 +143,7 @@ function ProductDetail() {
                 S/ {producto.precio.toFixed(2)}
               </div>
 
-              {/* Opciones (Color, Material - puedes personalizarlos) */}
+              {/* Opciones */}
               <div className="space-y-6 mb-8">
                 <Select>
                   <label className="block text-sm font-semibold mb-3">
@@ -232,16 +201,16 @@ function ProductDetail() {
                 <Button
                   size="lg"
                   onClick={handleAddToCart}
-                  disabled={producto.stock === 0}
-                  className="flex-1 cursor-pointer text-white text-lg"
+                  disabled={producto.stock === 0 || isAdding}
+                  className="flex-1 cursor-pointer text-white text-lg disabled:opacity-50"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  Añadir al carrito
+                  {isAdding ? "Agregando..." : "Añadir al carrito"}
                 </Button>
 
                 <button
                   onClick={() => toggleFavorite(producto.id)}
-                  disabled={toggling === producto.id}
+                  disabled={isToggling}
                   className="w-10 flex justify-center cursor-pointer items-center bg-white rounded-full shadow-md hover:bg-gray-50 transition disabled:opacity-50"
                 >
                   <Heart
@@ -297,9 +266,8 @@ function ProductDetail() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {productosRelacionados.map((prod) => (
-                  <div className="border bg-white border-gray-200 rounded-2xl">
+                  <div key={prod.id} className="border bg-white border-gray-200 rounded-2xl">
                     <Link
-                      key={prod.id}
                       to={`/productos/${prod.id}`}
                       className="group"
                     >
@@ -318,14 +286,15 @@ function ProductDetail() {
                       </p>
                       <Button
                         size="sm"
-                        onClick={() => handleAddToCart()}
-                        disabled={producto.stock === 0}
+                        onClick={() => {
+                          addToCart(prod);
+                          toast.success(`"${prod.nombre}" agregado al carrito`);
+                        }}
+                        disabled={prod.stock === 0}
                         className="w-full cursor-pointer"
                       >
                         <ShoppingCart className="w-4 h-4 mr-2" />
-                        {producto.stock === 0
-                          ? "Agotado"
-                          : "Agregar al carrito"}
+                        {prod.stock === 0 ? "Agotado" : "Agregar al carrito"}
                       </Button>
                     </div>
                   </div>

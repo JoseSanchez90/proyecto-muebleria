@@ -151,7 +151,7 @@ function Home() {
       {/* MOSTRAR SKELETON O CAROUSEL (no ambos) */}
       {loading ? (
         // SPINNER elegante
-        <div className="xl:h-[30rem] 2xl:h-[48rem] w-full rounded-3xl bg-gradient-to-br from-gray-200 to-gray-300 shadow-lg flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center">
           <div className="text-center space-y-6">
             {/* Spinner con sombra */}
             <div className="flex justify-center">
