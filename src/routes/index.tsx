@@ -8,7 +8,7 @@ import Loader from "@/components/common/loader";
 
 // Lazy load de las páginas
 const Home = lazy(() => import("@/pages/home"))
-const Profile = lazy(() => import("@/pages/profile"));
+const Profile = lazy(() => import("@/pages/profile"))
 const ProductDetail = lazy(() => import("@/pages/productDetail"))
 const Sofa = lazy(() => import("@/pages/sofa"))
 const Mesa = lazy(() => import("@/pages/mesa"))
