@@ -24,7 +24,6 @@ function LoginModal({
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const { signIn, isSigningIn } = useAuthActions();
 
   // Cargar credenciales guardadas cuando abre el modal
@@ -50,7 +49,8 @@ function LoginModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setLoading(true);
+
+    // ❌ ELIMINAR: setLoading(true);
 
     console.log("Intentando login con:", {
       email,
@@ -58,36 +58,36 @@ function LoginModal({
       rememberMe,
     });
 
+    // ✅ LLAMAR signIn y manejar en los callbacks
     signIn(
       { email, password },
       {
         onSuccess: () => {
+          console.log("✅ Login exitoso");
+
+          // 👇 GUARDAR credenciales SI el login fue exitoso
+          if (rememberMe) {
+            localStorage.setItem("rememberedEmail", email);
+            localStorage.setItem("rememberedPassword", password);
+            console.log("Credenciales guardadas en localStorage");
+          } else {
+            localStorage.removeItem("rememberedEmail");
+            localStorage.removeItem("rememberedPassword");
+            console.log("Credenciales eliminadas de localStorage");
+          }
+
+          // Reset form y cerrar modal
+          setEmail("");
+          setPassword("");
           onClose();
-          // Reset form
+        },
+        onError: (error) => {
+          console.log("❌ Login fallido:", error);
+          setError("Correo o contraseña incorrectos");
+          // ❌ NO llamar setLoading(false) - React Query lo hace automáticamente
         },
       }
     );
-
-    if (error) {
-      setError("Correo o contraseña incorrectos");
-      setLoading(false);
-    } else {
-      // 👇 GUARDAR o ELIMINAR credenciales según el checkbox
-      if (rememberMe) {
-        localStorage.setItem("rememberedEmail", email);
-        localStorage.setItem("rememberedPassword", password);
-        console.log("Credenciales guardadas en localStorage");
-      } else {
-        localStorage.removeItem("rememberedEmail");
-        localStorage.removeItem("rememberedPassword");
-        console.log("Credenciales eliminadas de localStorage");
-      }
-
-      console.log("✅ Login exitoso");
-      onClose();
-      setEmail("");
-      setPassword("");
-    }
   };
 
   if (!isOpen) return null;
@@ -204,7 +204,7 @@ function LoginModal({
               disabled={isSigningIn}
               className="w-full bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-semibold cursor-pointer disabled:opacity-70"
             >
-              {loading ? (
+              {isSigningIn ? (
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   <span>Iniciando sesión...</span>

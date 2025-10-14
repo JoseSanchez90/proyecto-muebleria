@@ -144,6 +144,8 @@ export const useAuthActions = () => {
 
       toast.error(errorMessage);
     },
+    // AGREGAR ESTO: Resetear el estado automáticamente después del error
+    retry: false, // No reintentar automáticamente
   });
 
   // SIGN OUT MUTATION - NUEVO
