@@ -10,6 +10,7 @@ import { useState } from "react";
 import LoginModal from "./loginModal";
 import RegisterModal from "./registerModal";
 import ForgotPasswordModal from "./forgotPasswordModal";
+import toast from "react-hot-toast";
 
 function Cart() {
   const {
@@ -41,9 +42,23 @@ function Cart() {
   };
 
   // ✅ Función para manejar incremento/decremento
-  const handleQuantityChange = (productId: string, newQuantity: number) => {
-    if (newQuantity < 1) return; // No permitir cantidades menores a 1
-    updateQuantity({ productId, quantity: newQuantity }); // ✅ Corrección aquí
+  const handleQuantityChange = async (
+    productId: string,
+    newQuantity: number
+  ) => {
+    console.log("Cambiando cantidad:", { productId, newQuantity });
+
+    try {
+      if (newQuantity <= 0) {
+        await removeFromCart(productId);
+      } else {
+        await updateQuantity({ productId, quantity: newQuantity });
+      }
+      toast.success("Cantidad actualizada");
+    } catch (error) {
+      console.error("Error actualizando cantidad:", error);
+      toast.error("Error al actualizar la cantidad");
+    }
   };
 
   // Estados de carga
@@ -275,7 +290,11 @@ function Cart() {
                         </p>
                       </div>
                       <div>
-                        <Button onClick={() => setShowLoginModal(true)} size="lg" className="w-full cursor-pointer">
+                        <Button
+                          onClick={() => setShowLoginModal(true)}
+                          size="lg"
+                          className="w-full cursor-pointer"
+                        >
                           <LogIn className="w-4 h-4" />
                           Iniciar sesión para comprar
                         </Button>
