@@ -8,6 +8,7 @@ import Loader from "@/components/common/loader";
 
 // Lazy load de las páginas
 const Home = lazy(() => import("@/pages/home"))
+const Cart = lazy(() => import("@/pages/cart"))
 const Profile = lazy(() => import("@/pages/profile"))
 const ProductDetail = lazy(() => import("@/pages/productDetail"))
 const Sofa = lazy(() => import("@/pages/sofa"))
@@ -15,7 +16,6 @@ const Mesa = lazy(() => import("@/pages/mesa"))
 const Silla = lazy(() => import("@/pages/silla"))
 const Iluminacion = lazy(() => import("@/pages/iluminacion"))
 const Decoracion = lazy(() => import("@/pages/decoracion"))
-const Cart = lazy(() => import("@/pages/cart"))
 const NotFound = lazy(() => import("@/pages/notFound"))
 
 const router = createBrowserRouter([
@@ -24,6 +24,7 @@ const router = createBrowserRouter([
     element: <MainLayout />,
     children: [
       { path: "/", element: <Home /> },
+      { path: "/carrito", element: <Cart /> },
       { path: "/perfil", element: <Profile /> },
       { path: "/productos/:id", element: <ProductDetail /> },
       // { path: "/verificacion-de-pago", element: <Checkout /> },
@@ -34,7 +35,6 @@ const router = createBrowserRouter([
       { path: "/mesas", element: <Mesa /> },
       { path: "/iluminacion", element: <Iluminacion /> },
       { path: "/decoracion", element: <Decoracion /> },
-      { path: "/carrito", element: <Cart /> },
       { path: "*", element: <NotFound /> },
     ],
   },

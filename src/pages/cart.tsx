@@ -28,7 +28,7 @@ function Cart() {
   } = useCart();
 
   const envio = 0;
-  const subtotal = totalPrice; // ✅ totalPrice ya es el subtotal
+  const subtotal = totalPrice;
   const total = subtotal + (items.length > 0 ? envio : 0);
   const { user } = useAuth();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -41,7 +41,7 @@ function Cart() {
     }
   };
 
-  // ✅ Función para manejar incremento/decremento
+  // Función para manejar incremento/decremento
   const handleQuantityChange = async (
     productId: string,
     newQuantity: number
