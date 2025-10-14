@@ -14,7 +14,6 @@ const ProductDetail = lazy(() => import("@/pages/productDetail"))
 const Sofa = lazy(() => import("@/pages/sofa"))
 const Mesa = lazy(() => import("@/pages/mesa"))
 const Silla = lazy(() => import("@/pages/silla"))
-const Iluminacion = lazy(() => import("@/pages/iluminacion"))
 const Decoracion = lazy(() => import("@/pages/decoracion"))
 const NotFound = lazy(() => import("@/pages/notFound"))
 
@@ -33,7 +32,6 @@ const router = createBrowserRouter([
       { path: "/sofas", element: <Sofa /> },
       { path: "/sillas", element: <Silla /> },
       { path: "/mesas", element: <Mesa /> },
-      { path: "/iluminacion", element: <Iluminacion /> },
       { path: "/decoracion", element: <Decoracion /> },
       { path: "*", element: <NotFound /> },
     ],

@@ -9,7 +9,7 @@ import { IoIosSearch } from "react-icons/io";
 import { IMAGES } from "@/assets/images";
 import { CategoryMenuItem } from "../common/categoryMenuItem";
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, ShoppingCart, User } from "lucide-react";
+import { LogOut, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useEffect, useRef, useState } from "react";
 import LoginModal from "@/pages/loginModal";
@@ -116,29 +116,6 @@ function NavbarDesktop() {
               defaultImage={IMAGES.mesas.MesaComedor}
             />
             <CategoryMenuItem
-              title="Iluminacion"
-              items={[
-                { label: "Sala", path: "/iluminacion/sala", key: "sala" },
-                {
-                  label: "Dormitorio",
-                  path: "/iluminacion/dormitorio",
-                  key: "dormitorio",
-                },
-                {
-                  label: "Exterior",
-                  path: "/iluminacion/exterior",
-                  key: "exterior",
-                },
-                { label: "Todos", path: "/iluminacion", key: "" },
-              ]}
-              images={{
-                sala: IMAGES.iluminacion.IluminacionSala,
-                dormitorio: IMAGES.iluminacion.IluminacionDormitorio,
-                exterior: IMAGES.iluminacion.IluminacionExterior,
-              }}
-              defaultImage={IMAGES.iluminacion.IluminacionSala}
-            />
-            <CategoryMenuItem
               title="Decoración"
               items={[
                 { label: "Cocina", path: "/decoracion/cocina", key: "cocina" },
@@ -169,7 +146,7 @@ function NavbarDesktop() {
           </div>
 
           {/* Iconos de usuario y carrito */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {/* Avatar/Usuario */}
             {user ? (
               <div
@@ -283,7 +260,7 @@ function NavbarDesktop() {
               <>
                 <button onClick={() => setShowLoginModal(true)}>
                   <div className="flex items-center justify-center rounded-full p-2 transition-all duration-300 cursor-pointer">
-                    <User className="w-6 h-6 text-black" />
+                    <p className="text-gray-600 text-sm underline underline-offset-4">Iniciar sesión</p>
                   </div>
                 </button>
 
@@ -319,7 +296,6 @@ function NavbarDesktop() {
               </>
             )}
 
-            {/* Carrito */}
             {/* Carrito */}
             <Link to="/carrito" className="relative">
               <ShoppingCart className="w-6 h-6" />
