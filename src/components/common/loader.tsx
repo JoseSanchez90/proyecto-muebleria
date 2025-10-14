@@ -1,17 +1,5 @@
-import { useEffect, useState } from "react";
 
 function Loader() {
-  const [showContent, setShowContent] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowContent(true);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (showContent) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-white overflow-hidden">

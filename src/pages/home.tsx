@@ -66,11 +66,11 @@ function Home() {
           });
 
         console.log("Archivos encontrados:", files);
-        console.log("❌ Error al listar archivos:", error);
+        console.log("Error al listar archivos:", error);
 
         if (error) {
           console.error("Error al cargar imágenes de Supabase:", error);
-          // ⚠️ IMPORTANTE: No bloquear la app si falla Supabase
+          // IMPORTANTE: No bloquear la app si falla Supabase
           // Usar slides por defecto y continuar
           setLoading(false);
           return;
@@ -116,11 +116,11 @@ function Home() {
           console.log("No se encontraron imágenes válidas en Supabase");
         }
       } catch (err) {
-        console.error("❌ Error inesperado:", err);
+        console.error("Error inesperado:", err);
       } finally {
-        // ⚠️ IMPORTANTE: Siempre quitar el loading
+        // IMPORTANTE: Siempre quitar el loading
         setLoading(false);
-        console.log("✅ Carga de imágenes completada");
+        console.log("Carga de imágenes completada");
       }
     };
 

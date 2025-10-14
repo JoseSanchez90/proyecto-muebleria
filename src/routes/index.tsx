@@ -1,6 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Suspense, lazy } from "react";
-// import Loader from "@/components/common/loader";
 import MainLayout from "@/components/layout/mainLayout";
 import Favorites from "@/pages/favorites";
 import Orders from "@/pages/orders";
