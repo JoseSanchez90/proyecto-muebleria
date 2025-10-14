@@ -38,7 +38,6 @@ function NavbarDesktop() {
     setLoggingOut(true);
     try {
       await signOut();
-      toast.success("Sesión cerrada correctamente.");
       navigate("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
@@ -61,7 +60,7 @@ function NavbarDesktop() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ DATOS PARA MOSTRAR EN EL NAVBAR
+  // DATOS PARA MOSTRAR EN EL NAVBAR
   const userName = profileData?.name || user?.user_metadata?.name || "";
   const userLastName =
     profileData?.last_name || user?.user_metadata?.last_name || "";
@@ -136,11 +135,11 @@ function NavbarDesktop() {
             />
           </NavigationMenuList>
         </NavigationMenu>
-        <div className="flex items-center justify-center gap-8">
+        <div className="flex items-center justify-center gap-6">
           <div className="flex">
             <IoIosSearch className="relative w-5 h-5 left-7 top-2" />
             <Input
-              className="pl-9 w-60 2xl:w-80 bg-white"
+              className="pl-9 w-64 2xl:w-80 bg-gray-50"
               placeholder="Buscar"
             />
           </div>
@@ -158,7 +157,7 @@ function NavbarDesktop() {
                   onClick={() => setShowMenu(!showMenu)}
                   className="flex items-center gap-2 text-sm font-medium text-gray-800 hover:text-gray-600 transition cursor-pointer"
                 >
-                  {/* ✅ Avatar pequeño - USAR DATOS DE REACT QUERY */}
+                  {/* Avatar pequeño - USAR DATOS DE REACT QUERY */}
                   <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-300">
                     {userAvatar ? (
                       <img
@@ -173,7 +172,7 @@ function NavbarDesktop() {
                     )}
                   </div>
 
-                  {/* ✅ Texto del saludo - USAR DATOS DE REACT QUERY */}
+                  {/* Texto del saludo - USAR DATOS DE REACT QUERY */}
                   <span className="border-b border-gray-800">
                     {userName
                       ? `Hola, ${userName.split(" ")[0]}`
@@ -184,7 +183,7 @@ function NavbarDesktop() {
                 {/* Menú desplegable */}
                 {showMenu && (
                   <div className="absolute right-0 mt-10 w-72 bg-white rounded-lg shadow-lg py-2 z-50">
-                    {/* ✅ Header del menú - USAR DATOS DE REACT QUERY */}
+                    {/* Header del menú - USAR DATOS DE REACT QUERY */}
                     <div className="px-4 py-3 border-b flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300">
                         {userAvatar ? (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/cart/useCart";
@@ -61,10 +61,10 @@ function MasVendidos() {
       <div
         className={`${
           t.visible ? "animate-custom-enter" : "animate-custom-leave"
-        } max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}
+        } max-w-xs w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-gray-300 ring-opacity-5`}
       >
         <div className="flex-1 w-0 p-2">
-          <div className="flex items-start">
+          <div className="flex items-center justify-center">
             <div className="flex-shrink-0 pt-0.5">
               <img
                 className="h-14 w-14 rounded-sm"
@@ -81,14 +81,6 @@ function MasVendidos() {
               </p>
             </div>
           </div>
-        </div>
-        <div className="flex border-l border-gray-200">
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            className="w-full cursor-pointer border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          >
-            Aceptar
-          </button>
         </div>
       </div>
     ));

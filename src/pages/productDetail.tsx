@@ -1,5 +1,5 @@
 // src/pages/ProductDetail.tsx
-import { useState } from "react";
+
 import { useParams, Link } from "react-router-dom";
 import { ShoppingCart, Heart, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,48 +13,79 @@ import {
 } from "@/components/ui/select";
 import toast from "react-hot-toast";
 import { useFavorites } from "@/hooks/favorites/useFavorites";
-
-// ✅ IMPORTAR HOOKS DE REACT QUERY
-import { useCart } from '@/hooks/cart/useCart';
-import { useProductDetail } from '@/hooks/products/useProductDetail';
-import { useRelatedProducts } from '@/hooks/products/useRelatedProducts';
+// IMPORTAR HOOKS DE REACT QUERY
+import { useCart } from "@/hooks/cart/useCart";
+import { useProductDetail } from "@/hooks/products/useProductDetail";
+import { useRelatedProducts } from "@/hooks/products/useRelatedProducts";
+import { useState } from "react";
 
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const [cantidad, setCantidad] = useState(1);
   const { toggleFavorite, isFavorite, isToggling } = useFavorites();
-  
-  // ✅ REACT QUERY PARA DATOS
-  const { 
-    data: producto, 
-    isLoading, 
-    error 
-  } = useProductDetail(id);
-  
-  const { 
-    data: productosRelacionados = [] 
-  } = useRelatedProducts(producto?.categoria, id);
+  // REACT QUERY PARA DATOS
+  const { data: producto, isLoading, error } = useProductDetail(id);
+  const { data: productosRelacionados = [] } = useRelatedProducts(
+    producto?.categoria,
+    id
+  );
 
-  // ✅ HOOKS DE CARRITO Y FAVORITOS
+  // ✅ AGREGAR ESTOS ESTADOS
+  const [cantidad, setCantidad] = useState(1);
   const { addToCart, isAdding } = useCart();
 
-  const handleAddToCart = async () => {
-    if (producto) {
-      try {
-        // ✅ Agregar la cantidad especificada
-        for (let i = 0; i < cantidad; i++) {
-          await addToCart(producto);
-        }
-        toast.success(`"${producto.nombre}" agregado al carrito`);
-        setCantidad(1); // Resetear cantidad después de agregar
-      } catch (error) {
-        console.log(error)
-        toast.error("Error al agregar al carrito");
-      }
-    }
+  // ✅ MODIFICAR handleAddToCart para usar la cantidad
+  const handleAddToCart = () => {
+    if (!producto) return;
+    
+    console.log('🛒 Agregando al carrito:', {
+      producto: producto.nombre,
+      cantidadSeleccionada: cantidad
+    });
+
+    // ✅ ENVIAR producto Y cantidad
+    addToCart({ 
+      product: {
+        id: producto.id,
+        nombre: producto.nombre,
+        descripcion: producto.descripcion,
+        precio: producto.precio,
+        imagen_url: producto.imagen_url,
+        categoria: producto.categoria,
+        stock: producto.stock,
+      },
+      quantity: cantidad  // ← ENVIAR la cantidad seleccionada
+    });
+
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-custom-enter" : "animate-custom-leave"
+        } max-w-xs w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-gray-300 ring-opacity-5`}
+      >
+        <div className="flex-1 w-0 p-2">
+          <div className="flex items-center justify-center">
+            <div className="flex-shrink-0 pt-0.5">
+              <img
+                className="h-14 w-14 rounded-sm"
+                src={producto.imagen_url}
+                alt={producto.nombre}
+              />
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-medium text-gray-900">
+                {producto.nombre}
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                ¡Agregado {cantidad} {cantidad === 1 ? 'unidad' : 'unidades'} al carrito!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ));
   };
 
-  // ✅ MANEJAR CARGANDO
+  // MANEJAR CARGANDO
   if (isLoading) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -63,7 +94,7 @@ function ProductDetail() {
     );
   }
 
-  // ✅ MANEJAR ERROR O PRODUCTO NO ENCONTRADO
+  // MANEJAR ERROR O PRODUCTO NO ENCONTRADO
   if (error || !producto) {
     return (
       <main className="min-h-screen flex items-center justify-center pt-8 bg-gray-100">
@@ -80,7 +111,7 @@ function ProductDetail() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-gray-100 pt-8 px-40">
+    <main className="min-h-screen w-full bg-gray-100 py-8 px-40">
       <section>
         {/* Breadcrumb */}
         <div className="mx-auto px-4 py-4">
@@ -205,7 +236,7 @@ function ProductDetail() {
                   className="flex-1 cursor-pointer text-white text-lg disabled:opacity-50"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  {isAdding ? "Agregando..." : "Añadir al carrito"}
+                  {isAdding ? "Agregando..." : `Añadir al carrito`}
                 </Button>
 
                 <button
@@ -266,11 +297,11 @@ function ProductDetail() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {productosRelacionados.map((prod) => (
-                  <div key={prod.id} className="border bg-white border-gray-200 rounded-2xl">
-                    <Link
-                      to={`/productos/${prod.id}`}
-                      className="group"
-                    >
+                  <div
+                    key={prod.id}
+                    className="border bg-white border-gray-200 rounded-2xl"
+                  >
+                    <Link to={`/productos/${prod.id}`} className="group">
                       <div className="rounded-t-2xl overflow-hidden">
                         <img
                           src={prod.imagen_url}
@@ -287,8 +318,18 @@ function ProductDetail() {
                       <Button
                         size="sm"
                         onClick={() => {
-                          addToCart(prod);
-                          toast.success(`"${prod.nombre}" agregado al carrito`);
+                          addToCart({ 
+                            product: {
+                              id: prod.id,
+                              nombre: prod.nombre,
+                              descripcion: prod.descripcion,
+                              precio: prod.precio,
+                              imagen_url: prod.imagen_url,
+                              categoria: prod.categoria,
+                              stock: prod.stock,
+                            },
+                            quantity: 1
+                          });
                         }}
                         disabled={prod.stock === 0}
                         className="w-full cursor-pointer"

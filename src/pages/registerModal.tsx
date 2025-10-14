@@ -40,7 +40,7 @@ function RegisterModal({
   const [loading, setLoading] = useState(false);
   const { signUp, isSigningUp, signUpError, resetSignUp } = useAuthActions();
 
-  // ✅ RESET ERROR CUANDO SE ABRE EL MODAL
+  // RESET ERROR CUANDO SE ABRE EL MODAL
   useEffect(() => {
     if (isOpen) {
       resetSignUp();
@@ -48,7 +48,7 @@ function RegisterModal({
     }
   }, [isOpen, resetSignUp]);
 
-  // ✅ ACTUALIZAR ERROR DESDE LA MUTATION
+  // ACTUALIZAR ERROR DESDE LA MUTATION
   useEffect(() => {
     if (signUpError) {
       setError(signUpError.message || "Error al crear la cuenta");
@@ -63,14 +63,14 @@ function RegisterModal({
     }));
   };
 
-  // ✅ ENVIO DE FORMULARIO SIMPLIFICADO
+  // ENVIO DE FORMULARIO SIMPLIFICADO
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     resetSignUp();
 
-    console.log("📝 Datos del formulario a enviar:", formData);
+    console.log("Datos del formulario a enviar:", formData);
 
     // Validaciones
     if (formData.password !== formData.confirmPassword) {
@@ -88,9 +88,9 @@ function RegisterModal({
       return;
     }
 
-    console.log("✅ Validaciones pasadas, iniciando registro...");
+    console.log("Validaciones pasadas, iniciando registro...");
 
-    // ✅ LLAMAR LA MUTATION
+    // LLAMAR LA MUTATION
     signUp(formData, {
       onSuccess: () => {
         toast.success("Cuenta creada exitosamente");

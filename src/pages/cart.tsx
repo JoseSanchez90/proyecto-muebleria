@@ -10,7 +10,6 @@ import { useState } from "react";
 import LoginModal from "./loginModal";
 import RegisterModal from "./registerModal";
 import ForgotPasswordModal from "./forgotPasswordModal";
-import toast from "react-hot-toast";
 
 function Cart() {
   const {
@@ -54,10 +53,8 @@ function Cart() {
       } else {
         await updateQuantity({ productId, quantity: newQuantity });
       }
-      toast.success("Cantidad actualizada");
     } catch (error) {
       console.error("Error actualizando cantidad:", error);
-      toast.error("Error al actualizar la cantidad");
     }
   };
 
@@ -284,8 +281,8 @@ function Cart() {
                   {!user ? (
                     <>
                       <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-2">
-                        <p className="text-sm text-center">
-                          💡{" "}
+                        <p className="flex items-center justify-center gap-2 text-sm">
+                          <User className="w-4 h-4" />
                           <strong>Inicia sesión para proceder al pago</strong>
                         </p>
                       </div>

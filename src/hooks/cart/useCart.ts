@@ -162,16 +162,22 @@ export const useCart = () => {
 
   // AGREGAR AL CARRITO - HÍBRIDO (local + usuario)
   const addToCartMutation = useMutation({
-    mutationFn: async (product: {
-      id: string;
-      nombre: string;
-      descripcion: string;
-      precio: number;
-      imagen_url: string;
-      categoria: string;
-      stock: number;
+    mutationFn: async ({
+      product,
+      quantity = 1, // ← NUEVO: aceptar cantidad
+    }: {
+      product: {
+        id: string;
+        nombre: string;
+        descripcion: string;
+        precio: number;
+        imagen_url: string;
+        categoria: string;
+        stock: number;
+      };
+      quantity?: number; // ← NUEVO: parámetro opcional
     }) => {
-      console.log("Agregando/incrementando producto:", product.id);
+      console.log("Agregando producto:", product.id, "Cantidad:", quantity);
       console.log("Usuario:", user ? "logueado" : "no logueado");
 
       // SI EL USUARIO ESTÁ LOGUEADO - Guardar en Supabase
@@ -189,7 +195,7 @@ export const useCart = () => {
         }
 
         const currentQuantity = currentItems?.[0]?.quantity || 0;
-        const newQuantity = currentQuantity + 1;
+        const newQuantity = currentQuantity + quantity; // ← CAMBIO: sumar la cantidad
 
         console.log(
           `Cantidad actual: ${currentQuantity}, nueva: ${newQuantity}`
@@ -202,7 +208,7 @@ export const useCart = () => {
             {
               user_id: user.id,
               product_id: product.id,
-              quantity: newQuantity,
+              quantity: newQuantity, // ← NUEVA cantidad total
             },
             {
               onConflict: "user_id,product_id",
@@ -247,7 +253,7 @@ export const useCart = () => {
         if (existingItemIndex >= 0) {
           updatedCart = localCart.map((item, index) =>
             index === existingItemIndex
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, quantity: item.quantity + quantity } // ← CAMBIO: sumar la cantidad
               : item
           );
           console.log(
@@ -256,7 +262,7 @@ export const useCart = () => {
         } else {
           const newItem: LocalCartItem = {
             product_id: product.id,
-            quantity: 1,
+            quantity: quantity, // ← CAMBIO: usar la cantidad especificada
             products: product,
           };
           updatedCart = [...localCart, newItem];
@@ -272,7 +278,8 @@ export const useCart = () => {
         };
       }
     },
-    onMutate: async (product) => {
+    onMutate: async ({ product, quantity = 1 }) => {
+      // ← CAMBIO: aceptar quantity
       // ACTUALIZACIÓN OPTIMISTA PARA AMBOS CASOS
       if (user?.id) {
         // Para usuario logueado - actualizar cache de React Query
@@ -291,14 +298,14 @@ export const useCart = () => {
             if (existingItemIndex >= 0) {
               return old.map((item, index) =>
                 index === existingItemIndex
-                  ? { ...item, quantity: item.quantity + 1 }
+                  ? { ...item, quantity: item.quantity + quantity } // ← CAMBIO: sumar la cantidad
                   : item
               );
             } else {
               const newItem: CartItem = {
                 id: `temp-${Date.now()}`,
                 product_id: product.id,
-                quantity: 1,
+                quantity: quantity, // ← CAMBIO: usar la cantidad especificada
                 created_at: new Date().toISOString(),
                 products: product,
               };
@@ -525,7 +532,7 @@ export const useCart = () => {
     },
   });
 
-    // OBTENER ITEMS VISIBLES (híbrido)
+  // OBTENER ITEMS VISIBLES (híbrido)
   const getVisibleItems = (): (CartItem | LocalCartItem)[] => {
     if (user?.id) {
       return userCart;
@@ -549,12 +556,12 @@ export const useCart = () => {
     0
   );
 
-  console.log('🔄 useCart - Cálculos actualizados:', {
-  itemsCount: visibleItems.length,
-  totalItems,
-  totalPrice,
-  user: user?.id ? 'logueado' : 'no logueado'
-});
+  console.log("🔄 useCart - Cálculos actualizados:", {
+    itemsCount: visibleItems.length,
+    totalItems,
+    totalPrice,
+    user: user?.id ? "logueado" : "no logueado",
+  });
 
   return {
     // Datos

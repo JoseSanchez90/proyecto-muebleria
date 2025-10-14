@@ -50,7 +50,7 @@ function LoginModal({
     e.preventDefault();
     setError("");
 
-    // ❌ ELIMINAR: setLoading(true);
+    // ELIMINAR: setLoading(true);
 
     console.log("Intentando login con:", {
       email,
@@ -58,14 +58,14 @@ function LoginModal({
       rememberMe,
     });
 
-    // ✅ LLAMAR signIn y manejar en los callbacks
+    // LLAMAR signIn y manejar en los callbacks
     signIn(
       { email, password },
       {
         onSuccess: () => {
           console.log("✅ Login exitoso");
 
-          // 👇 GUARDAR credenciales SI el login fue exitoso
+          // GUARDAR credenciales SI el login fue exitoso
           if (rememberMe) {
             localStorage.setItem("rememberedEmail", email);
             localStorage.setItem("rememberedPassword", password);
