@@ -1,7 +1,7 @@
 // hooks/cart/useCartCount.ts
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/components/Authentication/authContext';
+import { useAuth } from '@/hooks/auth/useAuth';
 
 export const useCartCount = () => {
   const { user } = useAuth();

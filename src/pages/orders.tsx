@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/components/Authentication/authContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { supabase } from "@/lib/supabaseClient";
 import { Package, Truck, CheckCircle, Clock } from "lucide-react";
 

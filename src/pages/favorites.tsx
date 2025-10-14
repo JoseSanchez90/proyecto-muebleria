@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/Authentication/authContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { useCart } from "@/hooks/cart/useCart";
 import { supabase } from "@/lib/supabaseClient";
 import { Heart, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useFavorites } from "@/hooks/favorites/useFavorites"; // 
+import { useQuery } from "@tanstack/react-query";
+import { useFavorites } from "@/hooks/favorites/useFavorites";
 
 interface Product {
   id: string;
@@ -22,7 +22,6 @@ function Favorites() {
   const { user } = useAuth();
   const { addToCart } = useCart();
 
-  // ✅ Usar el nuevo hook useFavorites
   const {
     favorites,
     toggleFavorite,
@@ -30,37 +29,24 @@ function Favorites() {
     isRemoving,
   } = useFavorites();
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // Cargar productos favoritos
-  const loadFavoriteProducts = async () => {
-    if (favorites.length === 0) {
-      setProducts([]);
-      setLoading(false);
-      return;
-    }
-
-    try {
+    const { 
+    data: products = [], 
+    isLoading: productsLoading 
+  } = useQuery({
+    queryKey: ['favorite-products', favorites],
+    queryFn: async (): Promise<Product[]> => {
+      if (!favorites.length) return [];
+      
       const { data, error } = await supabase
         .from("productos")
         .select("*")
         .in("id", favorites);
 
       if (error) throw error;
-      setProducts(data || []);
-    } catch (error) {
-      console.error("Error cargando productos favoritos:", error);
-      toast.error("Error al cargar productos favoritos");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadFavoriteProducts();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [favorites]); // ✅ Dependencia correcta
+      return data || [];
+    },
+    enabled: favorites.length > 0,
+  });
 
   // Manejar agregar al carrito
   const handleAddToCart = (product: Product) => {
@@ -76,16 +62,16 @@ function Favorites() {
     };
 
     addToCart(cartItem);
-    toast("Producto agregado al carrito", {
-      icon: "🛒"
-    });
+    toast("Producto agregado al carrito", { icon: "🛒" });
   };
 
-  // ✅ Manejar toggle de favoritos (opcional - más eficiente)
+  // Manejar toggle de favoritos (opcional - más eficiente)
   const handleToggleFavorite = (productId: string) => {
     toggleFavorite(productId);
-    // Los toasts se manejan automáticamente en el hook
   };
+
+    // Loading combinado
+  const isLoading = favoritesLoading || productsLoading;
 
   // Redirigir si no está logueado
   if (!user) {
@@ -108,7 +94,7 @@ function Favorites() {
   }
 
   // ✅ Usar favoritesLoading del hook
-  if (favoritesLoading || loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 py-12 px-4">
         <div className="max-w-7xl mx-auto">

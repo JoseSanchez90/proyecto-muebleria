@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "@/hooks/cart/useCart";
 import { FaRegCreditCard } from "react-icons/fa6";
 import { formatPrice } from "@/utils/formatters";
-import { useAuth } from "@/components/Authentication/authContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { useState } from "react";
 import LoginModal from "./loginModal";
 import RegisterModal from "./registerModal";

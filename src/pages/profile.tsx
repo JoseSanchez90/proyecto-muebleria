@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/Authentication/authContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { supabase } from "@/lib/supabaseClient";
 import { Camera, MapPin, Package, Save, User } from "lucide-react";
 import { Button } from "@/components/ui/button";

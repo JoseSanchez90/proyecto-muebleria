@@ -10,7 +10,7 @@ import { IMAGES } from "@/assets/images";
 import { CategoryMenuItem } from "../common/categoryMenuItem";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, ShoppingCart, User } from "lucide-react";
-import { useAuth } from "../Authentication/authContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 import { useEffect, useRef, useState } from "react";
 import LoginModal from "@/pages/loginModal";
 import RegisterModal from "@/pages/registerModal";
@@ -28,7 +28,7 @@ function NavbarDesktop() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const navigate = useNavigate();
-  const { totalItems } = useCart();
+  const { totalItems, isLoading } = useCart();
 
   // USAR REACT QUERY PARA DATOS DEL PERFIL
   const { data: profileData } = useProfile(user?.id);
@@ -320,13 +320,18 @@ function NavbarDesktop() {
             )}
 
             {/* Carrito */}
+            {/* Carrito */}
             <Link to="/carrito" className="relative">
               <ShoppingCart className="w-6 h-6" />
-              {totalItems > 0 && (
+              {isLoading ? (
+                // Skeleton loader mientras carga
+                <div className="absolute -top-2 -right-2 bg-gray-300 rounded-full w-5 h-5 animate-pulse"></div>
+              ) : totalItems > 0 ? (
+                // Contador real cuando termina de cargar
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
                   {totalItems}
                 </span>
-              )}
+              ) : null}
             </Link>
           </div>
         </div>

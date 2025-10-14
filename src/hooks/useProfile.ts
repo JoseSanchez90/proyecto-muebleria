@@ -24,34 +24,34 @@ export const useProfile = (userId: string | undefined) => {
   return useQuery<UserProfile | null>({
     queryKey: ['profile', userId], 
     queryFn: async (): Promise<UserProfile | null> => {
-      // ✅ Early return más estricto
+      // Early return más estricto
       if (!userId || userId === 'undefined') {
-        console.log('🟡 useProfile: No userId válido');
+        console.log('useProfile: No userId válido');
         return null;
       }
 
-      console.log('🟡 useProfile: Ejecutando query para:', userId);
+      console.log('useProfile: Ejecutando query para:', userId);
       
       try {
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
-          .single();
+          .maybeSingle();
 
         if (error) {
-          console.error('🔴 useProfile - Error Supabase:', error);
-          // ✅ No lanzar error para usuarios no encontrados, retornar null
+          console.error('useProfile - Error Supabase:', error);
+          // No lanzar error para usuarios no encontrados, retornar null
           if (error.code === 'PGRST116') { // No encontrado
             return null;
           }
           throw error;
         }
 
-        console.log('🟢 useProfile - Datos obtenidos:', data);
+        console.log('useProfile - Datos obtenidos:', data);
         return data;
       } catch (error) {
-        console.error('🔴 useProfile - Error general:', error);
+        console.error('useProfile - Error general:', error);
         throw error;
       }
     },

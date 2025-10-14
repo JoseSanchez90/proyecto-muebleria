@@ -1,7 +1,7 @@
 // hooks/favorites/useFavorites.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/components/Authentication/authContext';
+import { useAuth } from '@/hooks/auth/useAuth';
 import toast from 'react-hot-toast';
 
 export const useFavorites = () => {

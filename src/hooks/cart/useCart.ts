@@ -1,8 +1,8 @@
 // hooks/cart/useCart.ts
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabaseClient";
-import { useAuth } from "@/components/Authentication/authContext";
+import { useAuth } from "@/hooks/auth/useAuth";
 
 export interface CartItem {
   id: string;
@@ -39,33 +39,44 @@ export const useCart = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  // ✅ ESTADO PARA CARRITO LOCAL
-  const [localCart, setLocalCart] = useState<LocalCartItem[]>(() => {
+// QUERY PARA CARRITO LOCAL (compartido entre componentes)
+const { data: localCart = [] } = useQuery({
+  queryKey: ['local-cart'],
+  queryFn: (): LocalCartItem[] => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('localCart');
       return saved ? JSON.parse(saved) : [];
     }
     return [];
-  });
+  },
+  staleTime: Infinity, // No se marca como stale
+});
 
-  // ✅ SINCRONIZAR CARRITO LOCAL CON USUARIO AL LOGEARSE
+// MUTATION PARA ACTUALIZAR CARRITO LOCAL
+const updateLocalCartMutation = useMutation({
+  mutationFn: async (newCart: LocalCartItem[]) => {
+    localStorage.setItem('localCart', JSON.stringify(newCart));
+    return newCart;
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['local-cart'] });
+  },
+});
+  
+
+  // SINCRONIZAR CARRITO LOCAL CON USUARIO AL LOGEARSE
   useEffect(() => {
     if (user?.id && localCart.length > 0) {
-      console.log('🔄 Sincronizando carrito local con usuario...', localCart);
+      console.log('Sincronizando carrito local con usuario...', localCart);
       syncLocalCartWithUser();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]); // Solo cuando el usuario cambia de null a logueado
 
-  // ✅ PERSISTIR CARRITO LOCAL EN localStorage
-  useEffect(() => {
-    localStorage.setItem('localCart', JSON.stringify(localCart));
-  }, [localCart]);
-
-  // ✅ FUNCIÓN PARA SINCRONIZAR CARRITO LOCAL CON SUPABASE
+  // FUNCIÓN PARA SINCRONIZAR CARRITO LOCAL CON SUPABASE
   const syncLocalCartWithUser = async () => {
     try {
-      console.log('🔄 Iniciando sincronización de carrito local...');
+      console.log('Iniciando sincronización de carrito local...');
       
       for (const localItem of localCart) {
         // Verificar si ya existe en el carrito del usuario
@@ -84,7 +95,7 @@ export const useCart = () => {
             .update({ quantity: newQuantity })
             .eq('user_id', user!.id)
             .eq('product_id', localItem.product_id);
-          console.log(`✅ Producto ${localItem.product_id} actualizado: ${newQuantity}`);
+          console.log(`Producto ${localItem.product_id} actualizado: ${newQuantity}`);
         } else {
           // Crear nuevo item
           await supabase
@@ -94,13 +105,13 @@ export const useCart = () => {
               product_id: localItem.product_id,
               quantity: localItem.quantity,
             });
-          console.log(`✅ Producto ${localItem.product_id} agregado: ${localItem.quantity}`);
+          console.log(`Producto ${localItem.product_id} agregado: ${localItem.quantity}`);
         }
       }
       
       // Limpiar carrito local después de sincronizar
-      setLocalCart([]);
-      console.log('✅ Carrito local sincronizado y limpiado');
+      await updateLocalCartMutation.mutateAsync([]);
+      console.log('Carrito local sincronizado y limpiado');
       
       // Invalidar queries para refrescar
       queryClient.invalidateQueries({ queryKey: ["cart", user!.id] });
@@ -110,13 +121,13 @@ export const useCart = () => {
     }
   };
 
-  // ✅ OBTENER CARRITO DEL USUARIO (si está logueado)
+  // OBTENER CARRITO DEL USUARIO (si está logueado)
   const { data: userCart = [], isLoading } = useQuery({
     queryKey: ["cart", user?.id],
     queryFn: async (): Promise<CartItem[]> => {
       if (!user?.id) return [];
 
-      console.log("🛒 Cargando carrito para usuario:", user.id);
+      console.log("Cargando carrito para usuario:", user.id);
 
       const { data, error } = await supabase
         .from("cart_items")
@@ -142,14 +153,14 @@ export const useCart = () => {
         throw error;
       }
 
-      console.log("✅ Carrito cargado:", data?.length || 0, "items");
+      console.log("Carrito cargado:", data?.length || 0, "items");
       return (data as CartItem[]) || [];
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000,
   });
 
-  // ✅ AGREGAR AL CARRITO - HÍBRIDO (local + usuario)
+  // AGREGAR AL CARRITO - HÍBRIDO (local + usuario)
   const addToCartMutation = useMutation({
     mutationFn: async (product: {
       id: string;
@@ -160,10 +171,10 @@ export const useCart = () => {
       categoria: string;
       stock: number;
     }) => {
-      console.log("➕ Agregando/incrementando producto:", product.id);
-      console.log("👤 Usuario:", user ? "logueado" : "no logueado");
+      console.log("Agregando/incrementando producto:", product.id);
+      console.log("Usuario:", user ? "logueado" : "no logueado");
 
-      // ✅ SI EL USUARIO ESTÁ LOGUEADO - Guardar en Supabase
+      // SI EL USUARIO ESTÁ LOGUEADO - Guardar en Supabase
       if (user?.id) {
         // Obtener cantidad actual
         const { data: currentItems, error: checkError } = await supabase
@@ -173,14 +184,14 @@ export const useCart = () => {
           .eq("product_id", product.id);
 
         if (checkError) {
-          console.error("❌ Error verificando cantidad actual:", checkError);
+          console.error("Error verificando cantidad actual:", checkError);
           throw checkError;
         }
 
         const currentQuantity = currentItems?.[0]?.quantity || 0;
         const newQuantity = currentQuantity + 1;
 
-        console.log(`🔄 Cantidad actual: ${currentQuantity}, nueva: ${newQuantity}`);
+        console.log(`Cantidad actual: ${currentQuantity}, nueva: ${newQuantity}`);
 
         // Upsert con la nueva cantidad
         const { data, error } = await supabase
@@ -212,11 +223,11 @@ export const useCart = () => {
           .single();
 
         if (error) {
-          console.error("❌ Error en upsert:", error);
+          console.error("Error en upsert:", error);
           throw error;
         }
 
-        console.log("✅ Producto agregado/actualizado en Supabase:", data);
+        console.log("Producto agregado/actualizado en Supabase:", data);
         return { 
           type: 'user', 
           action: 'upsert', 
@@ -226,7 +237,7 @@ export const useCart = () => {
         };
 
       } else {
-        // ✅ SI EL USUARIO NO ESTÁ LOGUEADO - Guardar en localStorage
+        // SI EL USUARIO NO ESTÁ LOGUEADO - Guardar en localStorage
         const existingItemIndex = localCart.findIndex(
           item => item.product_id === product.id
         );
@@ -238,7 +249,7 @@ export const useCart = () => {
               ? { ...item, quantity: item.quantity + 1 }
               : item
           );
-          console.log(`🔄 Producto existente en carrito local, nueva cantidad: ${updatedCart[existingItemIndex].quantity}`);
+          console.log(`Producto existente en carrito local, nueva cantidad: ${updatedCart[existingItemIndex].quantity}`);
         } else {
           const newItem: LocalCartItem = {
             product_id: product.id,
@@ -246,10 +257,10 @@ export const useCart = () => {
             products: product
           };
           updatedCart = [...localCart, newItem];
-          console.log("🆕 Nuevo producto agregado al carrito local");
+          console.log("Nuevo producto agregado al carrito local");
         }
 
-        setLocalCart(updatedCart);
+        await updateLocalCartMutation.mutateAsync(updatedCart);
         return { 
           type: 'local', 
           action: 'upsert', 
@@ -259,7 +270,7 @@ export const useCart = () => {
       }
     },
     onMutate: async (product) => {
-      // ✅ ACTUALIZACIÓN OPTIMISTA PARA AMBOS CASOS
+      // ACTUALIZACIÓN OPTIMISTA PARA AMBOS CASOS
       if (user?.id) {
         // Para usuario logueado - actualizar cache de React Query
         await queryClient.cancelQueries({ queryKey: ['cart', user.id] });
@@ -295,14 +306,14 @@ export const useCart = () => {
       }
     },
     onError: (error, _variables, context) => {
-      // ✅ REVERTIR EN CASO DE ERROR (solo para usuario logueado)
+      // REVERTIR EN CASO DE ERROR (solo para usuario logueado)
       if (context?.type === 'user' && context.previousCart) {
         queryClient.setQueryData(['cart', user?.id], context.previousCart);
       }
-      console.error("❌ Error en addToCart mutation:", error);
+      console.error("Error en addToCart mutation:", error);
     },
     onSettled: () => {
-      // ✅ SINCRONIZAR CON EL SERVIDOR (solo para usuario logueado)
+      // SINCRONIZAR CON EL SERVIDOR (solo para usuario logueado)
       if (user?.id) {
         queryClient.invalidateQueries({ queryKey: ["cart", user.id] });
       }
@@ -310,7 +321,7 @@ export const useCart = () => {
     },
   });
 
-  // ✅ ACTUALIZAR CANTIDAD - HÍBRIDO
+  // ACTUALIZAR CANTIDAD - HÍBRIDO
   const updateQuantityMutation = useMutation({
     mutationFn: async ({
       productId,
@@ -357,7 +368,7 @@ export const useCart = () => {
         // Usuario no logueado - localStorage
         if (quantity <= 0) {
           const updatedCart = localCart.filter(item => item.product_id !== productId);
-          setLocalCart(updatedCart);
+          await updateLocalCartMutation.mutateAsync(updatedCart);
           return { type: 'local', action: 'delete', productId };
         } else {
           const updatedCart = localCart.map(item =>
@@ -365,7 +376,7 @@ export const useCart = () => {
               ? { ...item, quantity }
               : item
           );
-          setLocalCart(updatedCart);
+          await updateLocalCartMutation.mutateAsync(updatedCart);
           return { type: 'local', action: 'update', productId, quantity };
         }
       }
@@ -398,7 +409,7 @@ export const useCart = () => {
       if (context?.type === 'user' && context.previousCart) {
         queryClient.setQueryData(['cart', user?.id], context.previousCart);
       }
-      console.error("❌ Error actualizando cantidad:", error);
+      console.error("Error actualizando cantidad:", error);
     },
     onSettled: () => {
       if (user?.id) {
@@ -407,7 +418,7 @@ export const useCart = () => {
     },
   });
 
-  // ✅ ELIMINAR DEL CARRITO - HÍBRIDO
+  // ELIMINAR DEL CARRITO - HÍBRIDO
   const removeFromCartMutation = useMutation({
     mutationFn: async (productId: string) => {
       if (user?.id) {
@@ -420,7 +431,7 @@ export const useCart = () => {
         return { type: 'user', action: 'delete', productId };
       } else {
         const updatedCart = localCart.filter(item => item.product_id !== productId);
-        setLocalCart(updatedCart);
+        await updateLocalCartMutation.mutateAsync(updatedCart);;
         return { type: 'local', action: 'delete', productId };
       }
     },
@@ -443,7 +454,7 @@ export const useCart = () => {
       if (context?.type === 'user' && context.previousCart) {
         queryClient.setQueryData(['cart', user?.id], context.previousCart);
       }
-      console.error("❌ Error eliminando del carrito:", error);
+      console.error("Error eliminando del carrito:", error);
     },
     onSettled: () => {
       if (user?.id) {
@@ -452,7 +463,7 @@ export const useCart = () => {
     },
   });
 
-  // ✅ VACIAR CARRITO - HÍBRIDO
+  // VACIAR CARRITO - HÍBRIDO
   const clearCartMutation = useMutation({
     mutationFn: async () => {
       if (user?.id) {
@@ -463,7 +474,7 @@ export const useCart = () => {
         if (error) throw error;
         return { type: 'user' };
       } else {
-        setLocalCart([]);
+        await updateLocalCartMutation.mutateAsync([]);
         return { type: 'local' };
       }
     },
@@ -481,7 +492,7 @@ export const useCart = () => {
       if (context?.type === 'user' && context.previousCart) {
         queryClient.setQueryData(['cart', user?.id], context.previousCart);
       }
-      console.error("❌ Error vaciando carrito:", error);
+      console.error("Error vaciando carrito:", error);
     },
     onSettled: () => {
       if (user?.id) {
@@ -490,7 +501,7 @@ export const useCart = () => {
     },
   });
 
-  // ✅ OBTENER ITEMS VISIBLES (híbrido)
+  // OBTENER ITEMS VISIBLES (híbrido)
   const getVisibleItems = (): (CartItem | LocalCartItem)[] => {
     if (user?.id) {
       return userCart;
@@ -506,7 +517,7 @@ export const useCart = () => {
     }
   };
 
-  // ✅ CÁLCULOS DERIVADOS (híbridos)
+  // CÁLCULOS DERIVADOS (híbridos)
   const visibleItems = getVisibleItems();
   const totalItems = visibleItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = visibleItems.reduce(
