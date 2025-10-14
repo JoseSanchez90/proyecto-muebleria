@@ -130,7 +130,7 @@ function Cart() {
         </div>
 
         {items.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-xl shadow-sm">
+          <div className="text-center xl:py-20 2xl:py-52 bg-white rounded-xl shadow-sm">
             <ShoppingBag className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-700 mb-2">
               Tu carrito está vacío

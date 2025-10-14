@@ -55,8 +55,8 @@ function LoUltimo() {
     loadProductos();
   }, []);
 
-  const handleComprar = (producto: Producto) => {
-    addToCart(producto);
+const handleComprar = (producto: Producto) => {
+    addToCart({ product: producto, quantity: 1 });
 
     toast.custom((t) => (
       <div

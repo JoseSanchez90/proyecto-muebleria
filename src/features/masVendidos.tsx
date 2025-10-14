@@ -55,7 +55,7 @@ function MasVendidos() {
   }, []);
 
   const handleComprar = (producto: Producto) => {
-    addToCart(producto);
+    addToCart({ product: producto, quantity: 1 });
 
     toast.custom((t) => (
       <div

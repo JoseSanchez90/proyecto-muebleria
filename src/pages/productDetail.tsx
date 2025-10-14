@@ -1,5 +1,4 @@
 // src/pages/ProductDetail.tsx
-
 import { useParams, Link } from "react-router-dom";
 import { ShoppingCart, Heart, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
