@@ -118,12 +118,12 @@ function Favorites() {
     );
   }
 
-  // ✅ Usar favoritesLoading del hook
+  // Usar favoritesLoading del hook
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-black mb-12">Mis Favoritos</h1>
+        <div className="container mx-auto px-4 max-w-5xl 2xl:max-w-6xl">
+          <h2 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">Mis Favoritos</h2>
           <div className="text-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
             <p className="text-gray-500">Cargando favoritos...</p>
@@ -135,10 +135,10 @@ function Favorites() {
 
   if (products.length === 0) {
     return (
-      <div className="min-h-screen w-full bg-gray-100 px-4 pt-20">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-black mb-20">Mis Favoritos</h1>
-          <div className="text-center py-20">
+      <div className="min-h-screen w-full bg-gray-100 px-4 py-12">
+        <div className="container mx-auto px-4 max-w-5xl 2xl:max-w-6xl">
+          <h2 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">Mis Favoritos</h2>
+          <div className="text-center py-8 2xl:py-20">
             <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg mb-4">
               No tienes productos favoritos aún
@@ -154,10 +154,10 @@ function Favorites() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4">
-      <div className="max-w-5xl 2xl:max-w-7xl mx-auto">
-        <h1 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
+      <div className="container mx-auto px-4 max-w-5xl 2xl:max-w-6xl">
+        <h2 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
           Mis Favoritos
-        </h1>
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6">
           {products.map((product) => (
@@ -174,7 +174,7 @@ function Favorites() {
                     className="w-full h-full object-cover"
                   />
 
-                  {/* ✅ Botón de corazón - actualizado */}
+                  {/* Botón de corazón - actualizado */}
                   <button
                     onClick={() => handleToggleFavorite(product.id)}
                     disabled={isRemoving}

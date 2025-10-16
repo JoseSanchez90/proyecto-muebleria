@@ -1,8 +1,8 @@
 // hooks/favorites/useFavorites.ts
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/auth/useAuth';
-import toast from 'react-hot-toast';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/hooks/auth/useAuth";
+import toast from "react-hot-toast";
 
 export const useFavorites = () => {
   const { user } = useAuth();
@@ -10,107 +10,114 @@ export const useFavorites = () => {
 
   // ✅ OBTENER FAVORITOS
   const { data: favorites = [], isLoading } = useQuery({
-    queryKey: ['favorites', user?.id],
+    queryKey: ["favorites", user?.id],
     queryFn: async (): Promise<string[]> => {
       if (!user?.id) return [];
 
       const { data, error } = await supabase
-        .from('favoritos')
-        .select('product_id')
-        .eq('user_id', user.id);
+        .from("favoritos")
+        .select("product_id")
+        .eq("user_id", user.id);
 
       if (error) throw error;
-      return data?.map(item => item.product_id) || [];
+      return data?.map((item) => item.product_id) || [];
     },
     enabled: !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutos
   });
 
-  // ✅ AGREGAR FAVORITO
+  // AGREGAR FAVORITO
   const addFavoriteMutation = useMutation({
     mutationFn: async (productId: string) => {
-      if (!user?.id) throw new Error('Usuario no autenticado');
+      if (!user?.id) throw new Error("Usuario no autenticado");
 
       const { error } = await supabase
-        .from('favoritos')
+        .from("favoritos")
         .insert({ user_id: user.id, product_id: productId });
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
     },
     onError: (error) => {
-      console.error('Error agregando favorito:', error);
-      toast.error('Error al agregar favorito');
+      console.error("Error agregando favorito:", error);
+      toast.error("Error al agregar favorito");
     },
   });
 
-  // ✅ ELIMINAR FAVORITO
+  // ELIMINAR FAVORITO
   const removeFavoriteMutation = useMutation({
     mutationFn: async (productId: string) => {
-      if (!user?.id) throw new Error('Usuario no autenticado');
+      if (!user?.id) throw new Error("Usuario no autenticado");
 
       const { error } = await supabase
-        .from('favoritos')
+        .from("favoritos")
         .delete()
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
+        .eq("user_id", user.id)
+        .eq("product_id", productId);
 
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['favorites', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
     },
     onError: (error) => {
-      console.error('Error eliminando favorito:', error);
-      toast.error('Error al eliminar favorito');
+      console.error("Error eliminando favorito:", error);
+      toast.error("Error al eliminar favorito");
     },
   });
 
-  // ✅ ALTERNAR FAVORITO
+  // ALTERNAR FAVORITO
   const toggleFavoriteMutation = useMutation({
     mutationFn: async (productId: string) => {
-      if (!user?.id) throw new Error('Usuario no autenticado');
+      if (!user?.id) throw new Error("Usuario no autenticado");
 
       const isCurrentlyFavorite = favorites.includes(productId);
 
       if (isCurrentlyFavorite) {
         // Eliminar favorito
         const { error } = await supabase
-          .from('favoritos')
+          .from("favoritos")
           .delete()
-          .eq('user_id', user.id)
-          .eq('product_id', productId);
+          .eq("user_id", user.id)
+          .eq("product_id", productId);
 
         if (error) throw error;
-        return 'removed';
+        return "removed";
       } else {
         // Agregar favorito
         const { error } = await supabase
-          .from('favoritos')
+          .from("favoritos")
           .insert({ user_id: user.id, product_id: productId });
 
         if (error) throw error;
-        return 'added';
+        return "added";
       }
     },
     onSuccess: (action) => {
-      queryClient.invalidateQueries({ queryKey: ['favorites', user?.id] });
-      
-      if (action === 'added') {
-        toast.success('Producto agregado a favoritos');
+      queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
+
+      if (action === "added") {
+        toast.success("Producto agregado a favoritos");
       } else {
-        toast.success('Producto removido de favoritos');
+        toast.success("Producto removido de favoritos");
       }
     },
     onError: (error) => {
-      console.error('Error al alternar favorito:', error);
-      toast.error('Error al actualizar favoritos');
+      console.error("Error al alternar favorito:", error);
+      toast("Inicia sesión o crea una cuenta para agregar a tus favoritos", {
+        style: {
+          border: "1px solid #e2e8f0",
+          padding: "10px",
+          color: "#314155",
+        },
+        icon: '⚠️',
+      });
     },
   });
 
-  // ✅ VERIFICAR SI ES FAVORITO
+  // VERIFICAR SI ES FAVORITO
   const isFavorite = (productId: string) => {
     return favorites.includes(productId);
   };
@@ -119,21 +126,24 @@ export const useFavorites = () => {
     // Datos
     favorites,
     isLoading,
-    
+
     // Acciones
     addFavorite: addFavoriteMutation.mutate,
     removeFavorite: removeFavoriteMutation.mutate,
     toggleFavorite: toggleFavoriteMutation.mutate,
-    
+
     // Estados de carga
     isAdding: addFavoriteMutation.isPending,
     isRemoving: removeFavoriteMutation.isPending,
     isToggling: toggleFavoriteMutation.isPending,
-    
+
     // Utilidades
     isFavorite,
-    
+
     // Errores
-    error: addFavoriteMutation.error || removeFavoriteMutation.error || toggleFavoriteMutation.error,
+    error:
+      addFavoriteMutation.error ||
+      removeFavoriteMutation.error ||
+      toggleFavoriteMutation.error,
   };
 };

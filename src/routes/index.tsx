@@ -10,6 +10,7 @@ import Loader from "@/components/common/loader";
 const Home = lazy(() => import("@/pages/home"))
 const Cart = lazy(() => import("@/pages/cart"))
 const Profile = lazy(() => import("@/pages/profile"))
+const Products = lazy(() => import("@/pages/products"))
 const ProductDetail = lazy(() => import("@/pages/productDetail"))
 const Sofa = lazy(() => import("@/pages/sofa"))
 const Mesa = lazy(() => import("@/pages/mesa"))
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/carrito", element: <Cart /> },
       { path: "/perfil", element: <Profile /> },
+      { path: "/productos", element: <Products /> },
       { path: "/productos/:id", element: <ProductDetail /> },
       // { path: "/verificacion-de-pago", element: <Checkout /> },
       { path: "/mis-favoritos", element: <Favorites /> },

@@ -48,7 +48,7 @@ function Profile() {
   const { user } = useAuth();
   const userId = useMemo(() => user?.id, [user?.id]);
 
-  // ✅ REACT QUERY PARA DATOS
+  // REACT QUERY PARA DATOS
   const {
     data: profileData,
     isLoading: profileLoading,
@@ -58,13 +58,13 @@ function Profile() {
 
   const { data: orders, isLoading: ordersLoading } = useOrders(userId);
 
-  // ✅ UN SOLO ESTADO PARA FORMULARIOS - INICIALIZAR CON DATOS DE REACT QUERY
+  // UN SOLO ESTADO PARA FORMULARIOS - INICIALIZAR CON DATOS DE REACT QUERY
   const [formData, setFormData] = useState<Partial<ProfileType>>({});
 
-  // ✅ SINCRONIZAR FORM DATA CON DATOS DEL PERFIL
+  // SINCRONIZAR FORM DATA CON DATOS DEL PERFIL
   useEffect(() => {
     if (profileData) {
-      console.log("✅ Sincronizando formData con profileData:", profileData);
+      console.log("Sincronizando formData con profileData:", profileData);
       setFormData({
         name: profileData.name || "",
         last_name: profileData.last_name || "",
@@ -81,7 +81,7 @@ function Profile() {
     }
   }, [profileData]);
 
-  // ✅ USEEFFECT PARA FILTRADO - USAR formData
+  // USEEFFECT PARA FILTRADO - USAR formData
   useEffect(() => {
     if (formData.department) {
       const filtradas = provincias
@@ -112,7 +112,7 @@ function Profile() {
     }
   }, [formData.province]);
 
-  // ✅ REDIRIGIR SI NO HAY USUARIO
+  // REDIRIGIR SI NO HAY USUARIO
   useEffect(() => {
     if (!user) {
       const timer = setTimeout(() => {
@@ -122,7 +122,7 @@ function Profile() {
     }
   }, [user]);
 
-  // ✅ ESTADOS DE CARGA
+  // ESTADOS DE CARGA
   if (profileLoading) {
     return (
       <div className="min-h-screen bg-gray-100 pt-16 flex items-center justify-center">
@@ -156,7 +156,7 @@ function Profile() {
     );
   }
 
-  // ✅ AVATAR SRC - USAR formData
+  // AVATAR SRC - USAR formData
   const avatarSrc = formData.avatar_url || "/default-avatar.png";
 
   const uploadAvatar = async (file: File) => {
@@ -191,7 +191,7 @@ function Profile() {
 
       if (updateError) throw updateError;
 
-      // ✅ ACTUALIZAR formData Y REFRESCAR REACT QUERY
+      // ACTUALIZAR formData Y REFRESCAR REACT QUERY
       setFormData((prev) => ({ ...prev, avatar_url: publicUrl }));
       await refetchProfile();
 
@@ -281,10 +281,13 @@ function Profile() {
     }
   };
 
-  // ✅ JSX ACTUALIZADO - USAR formData EN LUGAR DE profile
+  // USAR formData EN LUGAR DE profile
   return (
-    <div className="min-h-screen bg-gray-100 pt-16">
-      <div className="container mx-auto px-4 max-w-6xl">
+    <div className="min-h-screen bg-gray-100 py-12 px-4">
+      <div className="container mx-auto px-4 max-w-5xl 2xl:max-w-6xl">
+        <h1 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
+          Mi Perfil
+        </h1>
         {/* Header */}
         <div className="bg-white rounded-xl shadow-sm p-8 mb-6">
           <div className="flex items-center gap-6">
@@ -380,7 +383,6 @@ function Profile() {
             {/* Información Personal - USAR formData */}
             {activeTab === "personal" && (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold mb-4">Datos personales</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -424,7 +426,7 @@ function Profile() {
                           dni: e.target.value,
                         }))
                       }
-                      placeholder="12345678"
+                      placeholder="Número"
                       maxLength={8}
                     />
                   </div>
@@ -440,7 +442,7 @@ function Profile() {
                           phone: e.target.value,
                         }))
                       }
-                      placeholder="+51 999 999 999"
+                      placeholder="Movil"
                     />
                   </div>
                   <div>
@@ -483,9 +485,6 @@ function Profile() {
             {/* Dirección de Envío */}
             {activeTab === "address" && (
               <div className="space-y-6">
-                <h3 className="text-xl font-semibold mb-4">
-                  Dirección de entrega
-                </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -499,7 +498,7 @@ function Profile() {
                           address: e.target.value,
                         }))
                       }
-                      placeholder="Av. Principal 123, Dpto 101"
+                      placeholder="Escribe tu dirección exacta"
                     />
                   </div>
                   <div className="md:col-span-2">
@@ -514,7 +513,7 @@ function Profile() {
                           reference: e.target.value,
                         }))
                       }
-                      placeholder="Cerca al parque, edificio de color azul"
+                      placeholder="Escribe una referencia cerca a tu hogar"
                     />
                   </div>
                   <div>
@@ -647,14 +646,13 @@ function Profile() {
             {/* Historial de Pedidos */}
             {activeTab === "orders" && (
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold mb-4">Mis pedidos</h3>
 
                 {ordersLoading ? (
                   <div className="text-center py-12">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4"></div>
                     <p className="text-gray-500">Cargando pedidos...</p>
                   </div>
-                ) : !orders || orders.length === 0 ? ( // ✅ FIX: Verificar si es undefined o vacío
+                ) : !orders || orders.length === 0 ? ( // Verificar si es undefined o vacío
                   <div className="text-center py-12">
                     <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500 text-lg mb-2">
@@ -668,7 +666,7 @@ function Profile() {
                   <div className="space-y-4">
                     {orders.map(
                       (
-                        order: Order // ✅ FIX: Tipar explícitamente
+                        order: Order // Tipar explícitamente
                       ) => (
                         <div
                           key={order.id}

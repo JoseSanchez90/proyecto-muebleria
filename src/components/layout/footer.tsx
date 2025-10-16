@@ -40,7 +40,7 @@ function Footer() {
           </div>
         </div>
       </div>
-      <div className="w-full text-center py-4">
+      <div className="w-full text-center py-2">
         <small className="text-gray-600">&copy; 2025 Muebles Munfort. Todos los derechos reservados.</small>
       </div>
     </section>

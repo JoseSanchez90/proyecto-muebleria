@@ -147,11 +147,11 @@ function Home() {
   });
 
   return (
-    <main className="min-h-screen px-20 bg-gray-100 pt-4 2xl:pt-8">
+    <main className="min-h-screen px-20 bg-gray-100 pt-6 2xl:pt-8">
       {/* MOSTRAR SKELETON O CAROUSEL (no ambos) */}
       {loading ? (
         // SPINNER elegante
-        <div className="min-h-screen flex items-center justify-center">
+        <section className="min-h-screen flex items-center justify-center">
           <div className="text-center space-y-6">
             {/* Spinner con sombra */}
             <div className="flex justify-center">
@@ -166,7 +166,7 @@ function Home() {
               <p className="text-gray-600 text-sm">Un momento, por favor</p>
             </div>
           </div>
-        </div>
+        </section>
       ) : (
         // CAROUSEL cuando terminó de cargar
         <section className="relative xl:h-[30rem] 2xl:h-[48rem] overflow-hidden rounded-3xl">
@@ -262,7 +262,7 @@ function Home() {
       )}
 
       {/* El resto de tu contenido */}
-      <section className="w-full h-full py-24 space-y-16">
+      <section className="w-full h-full pt-24 space-y-16">
         <div className="flex flex-col gap-6 2xl:gap-10">
           <h2 className="text-3xl font-bold">Nuestros más vendidos</h2>
           <div>
@@ -277,7 +277,7 @@ function Home() {
         </div>
       </section>
 
-      <section className="pt-16 pb-36">
+      <section className="py-24">
         <div className="flex justify-between items-center bg-white p-16 border border-gray-300 rounded-2xl">
           <div className="flex flex-col gap-2">
             <h3 className="text-3xl font-semibold">

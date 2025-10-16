@@ -2,17 +2,16 @@
 import { useParams, Link } from "react-router-dom";
 import { ShoppingCart, Heart, ChevronRight, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import toast from "react-hot-toast";
 import { useFavorites } from "@/hooks/favorites/useFavorites";
-// IMPORTAR HOOKS DE REACT QUERY
 import { useCart } from "@/hooks/cart/useCart";
 import { useProductDetail } from "@/hooks/products/useProductDetail";
 import { useRelatedProducts } from "@/hooks/products/useRelatedProducts";
@@ -21,27 +20,24 @@ import { useState } from "react";
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const { toggleFavorite, isFavorite, isToggling } = useFavorites();
-  // REACT QUERY PARA DATOS
   const { data: producto, isLoading, error } = useProductDetail(id);
   const { data: productosRelacionados = [] } = useRelatedProducts(
     producto?.categoria,
     id
   );
-
-  // ✅ AGREGAR ESTOS ESTADOS
   const [cantidad, setCantidad] = useState(1);
   const { addToCart, isAdding } = useCart();
 
-  // ✅ MODIFICAR handleAddToCart para usar la cantidad
+  // MODIFICAR handleAddToCart para usar la cantidad
   const handleAddToCart = () => {
     if (!producto) return;
     
-    console.log('🛒 Agregando al carrito:', {
+    console.log('Agregando al carrito:', {
       producto: producto.nombre,
       cantidadSeleccionada: cantidad
     });
 
-    // ✅ ENVIAR producto Y cantidad
+    // ENVIAR producto Y cantidad
     addToCart({ 
       product: {
         id: producto.id,
@@ -52,7 +48,7 @@ function ProductDetail() {
         categoria: producto.categoria,
         stock: producto.stock,
       },
-      quantity: cantidad  // ← ENVIAR la cantidad seleccionada
+      quantity: cantidad  // ENVIAR la cantidad seleccionada
     });
 
     toast.custom((t) => (
@@ -110,21 +106,17 @@ function ProductDetail() {
   }
 
   return (
-    <main className="min-h-screen w-full bg-gray-100 py-8 px-40">
-      <section>
+    <main className="min-h-screen bg-gray-100 py-12 px-4">
+      <section className="max-w-5xl 2xl:max-w-7xl mx-auto">
         {/* Breadcrumb */}
-        <div className="mx-auto px-4 py-4">
+        <div className="mx-auto px-4 py-2 2xl:py-4">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Link to="/" className="hover:text-black">
               Inicio
             </Link>
             <ChevronRight className="w-4 h-4" />
-            <Link to="/" className="hover:text-black">
+            <Link to="/productos" className="hover:text-black">
               Productos
-            </Link>
-            <ChevronRight className="w-4 h-4" />
-            <Link to="/" className="hover:text-black">
-              {producto.categoria}
             </Link>
             <ChevronRight className="w-4 h-4" />
             <span className="text-black">{producto.nombre}</span>
@@ -132,15 +124,15 @@ function ProductDetail() {
         </div>
 
         {/* Contenido principal */}
-        <div className="mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 2xl:px-20">
+        <div className="mx-auto px-4 py-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Galería de imágenes */}
             <section>
               <div className="bg-gray-100 rounded-2xl overflow-hidden mb-4">
                 <img
                   src={producto.imagen_url}
                   alt={producto.nombre}
-                  className="w-full h-[500px] object-cover"
+                  className="w-full h-[400px] 2xl:h-[500px] object-cover"
                 />
               </div>
 
@@ -163,18 +155,18 @@ function ProductDetail() {
 
             {/* Información del producto */}
             <section>
-              <h1 className="text-4xl font-bold mb-2">{producto.nombre}</h1>
+              <h1 className="text-3xl 2xl:text-4xl font-bold mb-4">{producto.nombre}</h1>
 
-              <p className="text-gray-600 mb-4 leading-relaxed">
+              <p className="text-gray-600 mb-8 leading-relaxed">
                 {producto.descripcion}
               </p>
 
-              <div className="text-3xl font-bold text-black mb-6">
+              <div className="text-2xl 2xl:text-3xl font-bold text-black mb-8">
                 S/ {producto.precio.toFixed(2)}
               </div>
 
               {/* Opciones */}
-              <div className="space-y-6 mb-8">
+              {/* <div className="space-y-6 mb-8">
                 <Select>
                   <label className="block text-sm font-semibold mb-3">
                     Color
@@ -206,14 +198,14 @@ function ProductDetail() {
                     </SelectGroup>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
 
               {/* Cantidad y botones */}
-              <div className="flex gap-6 mb-8">
+              <div className="flex gap-6 mb-10">
                 <div className="flex items-center bg-white border border-gray-300 rounded-lg">
                   <button
                     onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-                    className="p-2 cursor-pointer hover:bg-gray-200"
+                    className="p-2 rounded-l-lg cursor-pointer hover:bg-gray-400"
                   >
                     <Minus className="w-5 h-5" />
                   </button>
@@ -222,7 +214,7 @@ function ProductDetail() {
                     onClick={() =>
                       setCantidad(Math.min(producto.stock, cantidad + 1))
                     }
-                    className="p-2 cursor-pointer hover:bg-gray-200"
+                    className="p-2 rounded-r-lg cursor-pointer hover:bg-gray-400"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
@@ -254,7 +246,7 @@ function ProductDetail() {
               </div>
 
               {/* Acordeones */}
-              <div className="space-y-2">
+              <div className="2xl:space-y-2">
                 <details className="border-b border-gray-200 py-4">
                   <summary className="font-semibold cursor-pointer flex justify-between items-center">
                     Descripción completa
@@ -294,7 +286,7 @@ function ProductDetail() {
               <h2 className="text-3xl font-bold mb-8">
                 Productos Relacionados
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {productosRelacionados.map((prod) => (
                   <div
                     key={prod.id}
@@ -305,7 +297,7 @@ function ProductDetail() {
                         <img
                           src={prod.imagen_url}
                           alt={prod.nombre}
-                          className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-52 2xL:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     </Link>
@@ -316,20 +308,7 @@ function ProductDetail() {
                       </p>
                       <Button
                         size="sm"
-                        onClick={() => {
-                          addToCart({ 
-                            product: {
-                              id: prod.id,
-                              nombre: prod.nombre,
-                              descripcion: prod.descripcion,
-                              precio: prod.precio,
-                              imagen_url: prod.imagen_url,
-                              categoria: prod.categoria,
-                              stock: prod.stock,
-                            },
-                            quantity: 1
-                          });
-                        }}
+                        onClick={() => handleAddToCart()}
                         disabled={prod.stock === 0}
                         className="w-full cursor-pointer"
                       >

@@ -4,11 +4,11 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu";
-import { Input } from "../ui/input";
+import { Input } from "@/components/ui/input";
 import { IoIosSearch } from "react-icons/io";
 import { IMAGES } from "@/assets/images";
 import { CategoryMenuItem } from "../common/categoryMenuItem";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { LogOut, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useEffect, useRef, useState } from "react";
@@ -27,7 +27,6 @@ function NavbarDesktop() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
-  const navigate = useNavigate();
   const { totalItems, isLoading } = useCart();
 
   // USAR REACT QUERY PARA DATOS DEL PERFIL
@@ -38,7 +37,6 @@ function NavbarDesktop() {
     setLoggingOut(true);
     try {
       await signOut();
-      navigate("/");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       toast.error("Hubo un problema al cerrar sesión.");
@@ -81,6 +79,11 @@ function NavbarDesktop() {
             <NavigationMenuItem>
               <NavigationMenuLink href="/" className="font-semibold">
                 Inicio
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/productos" className="font-semibold">
+                Productos
               </NavigationMenuLink>
             </NavigationMenuItem>
             <NavigationMenuItem>
@@ -139,7 +142,7 @@ function NavbarDesktop() {
           <div className="flex">
             <IoIosSearch className="relative w-5 h-5 left-7 top-2" />
             <Input
-              className="pl-9 w-64 2xl:w-80 bg-gray-50"
+              className="pl-9 w-64 2xl:w-80 bg-white"
               placeholder="Buscar"
             />
           </div>
@@ -259,7 +262,9 @@ function NavbarDesktop() {
               <>
                 <button onClick={() => setShowLoginModal(true)}>
                   <div className="flex items-center justify-center rounded-full p-2 transition-all duration-300 cursor-pointer">
-                    <p className="text-gray-600 text-sm underline underline-offset-4">Iniciar sesión</p>
+                    <p className="text-gray-600 text-sm underline underline-offset-4">
+                      Iniciar sesión
+                    </p>
                   </div>
                 </button>
 

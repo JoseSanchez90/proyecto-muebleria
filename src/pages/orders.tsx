@@ -116,7 +116,7 @@ export default function Orders() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-100 py-12 px-4 flex items-center justify-center">
-        <div className="text-center">
+        <div className="max-w-7xl mx-auto">
           <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-2">Acceso requerido</h2>
           <p className="text-gray-600">Inicia sesión para ver tus pedidos</p>
@@ -138,8 +138,8 @@ export default function Orders() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-black mb-8">
+      <div className="container mx-auto px-4 max-w-5xl 2xl:max-w-6xl">
+        <h1 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
           Mi historial de pedidos
         </h1>
 
