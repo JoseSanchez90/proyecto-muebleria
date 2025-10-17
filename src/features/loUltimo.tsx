@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/cart/useCart";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { formatPrice } from "@/utils/formatters";
 
 interface Producto {
   id: string;
@@ -186,6 +187,13 @@ function LoUltimo() {
                         {producto.categoria}
                       </span>
                     </div>
+
+                    {/* Badge de Lo último */}
+                    <div className="absolute top-3 right-3">
+                      <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-semibold text-white">
+                        Lo Último
+                      </span>
+                    </div>
                   </div>
 
                   {/* Información del producto */}
@@ -203,7 +211,7 @@ function LoUltimo() {
                     {/* Precio */}
                     <div className="flex items-center justify-between">
                       <span className="text-xl 2xl:text-2xl font-bold text-gray-900">
-                        S/ {producto.precio.toFixed(2)}
+                        S/ {formatPrice(producto.precio)}
                       </span>
                     </div>
 
@@ -259,6 +267,13 @@ function LoUltimo() {
                           {producto.categoria}
                         </span>
                       </div>
+
+                      {/* Badge de Lo último */}
+                      <div className="absolute top-3 right-3">
+                        <span className="bg-blue-600 px-3 py-1 rounded-full text-xs font-semibold text-white">
+                          Lo Último
+                        </span>
+                      </div>
                     </div>
 
                     {/* Información del producto */}
@@ -276,7 +291,7 @@ function LoUltimo() {
                       {/* Precio */}
                       <div className="flex items-center justify-between">
                         <span className="text-xl font-bold text-gray-900">
-                          S/ {producto.precio.toFixed(2)}
+                          S/ {formatPrice(producto.precio)}
                         </span>
                       </div>
 
