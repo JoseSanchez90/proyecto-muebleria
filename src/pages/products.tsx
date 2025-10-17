@@ -630,7 +630,7 @@ function Products() {
 
                         {/* Overlay con botones */}
                         <div
-                          className={`absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-4 transition-opacity duration-300 ${
+                          className={`hidden lg:flex absolute inset-0 bg-black/40 flex-col items-center justify-center gap-4 transition-opacity duration-300 ${
                             hoveredId === product.id
                               ? "opacity-100"
                               : "opacity-0"

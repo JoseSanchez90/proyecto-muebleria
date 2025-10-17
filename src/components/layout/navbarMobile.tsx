@@ -1,6 +1,5 @@
 // components/NavbarMobile.tsx
 import { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import {
   Menu,
   X,
@@ -23,6 +22,7 @@ import LoginModal from "@/pages/loginModal";
 import RegisterModal from "@/pages/registerModal";
 import ForgotPasswordModal from "@/pages/forgotPasswordModal";
 import { useProducts } from "@/hooks/products/useProducts";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 function NavbarMobile() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,7 +42,7 @@ function NavbarMobile() {
   const { totalItems, isLoading } = useCart();
   const { data: profileData } = useProfile(user?.id);
   const navigate = useNavigate();
-
+  const location = useLocation();
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -50,6 +50,10 @@ function NavbarMobile() {
   // Datos del usuario
   const userName = profileData?.name || user?.user_metadata?.name || "";
   const userAvatar = profileData?.avatar_url || user?.user_metadata?.avatar_url;
+
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
+  };
 
   // Función de búsqueda
   const handleSearch = (query: string) => {
@@ -419,98 +423,120 @@ function NavbarMobile() {
         )}
 
         {/* Menú desplegable principal - SIEMPRE DISPONIBLE */}
-        {isMenuOpen && (
-          <div
-            ref={menuRef}
-            className="fixed top-[64px] left-0 w-full bg-white shadow-lg border-t border-gray-200 max-h-[calc(100vh-64px)] overflow-y-auto animate-in slide-in-from-top duration-200 z-40"
-          >
-            <div className="p-4 space-y-4">
-              {/* Navegación principal */}
-              <div className="space-y-1">
-                <Link
-                  to="/"
-                  className="block py-3 px-4 text-gray-800 hover:bg-gray-50 rounded-lg font-medium transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Inicio
-                </Link>
-                <Link
-                  to="/productos"
-                  className="block py-3 px-4 text-gray-800 hover:bg-gray-50 rounded-lg font-medium transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Productos
-                </Link>
-                <Link
-                  to="/sofas"
-                  className="block py-3 px-4 text-gray-800 hover:bg-gray-50 rounded-lg font-medium transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Sofás
-                </Link>
-              </div>
-
-              {/* Categorías desplegables */}
-              <div className="border-t border-gray-200 pt-4">
-                {categories.map((category) => (
-                  <div key={category.title} className="mb-2">
-                    <button
-                      onClick={() => toggleCategory(category.title)}
-                      className="flex items-center justify-between w-full py-3 px-4 text-gray-800 hover:bg-gray-50 rounded-lg font-medium transition-colors"
-                    >
-                      <span>{category.title}</span>
-                      {openCategories.includes(category.title) ? (
-                        <ChevronDown className="w-4 h-4" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4" />
-                      )}
-                    </button>
-
-                    {openCategories.includes(category.title) && (
-                      <div className="ml-4 space-y-1 mt-1 animate-in fade-in duration-200">
-                        {category.items.map((item) => (
-                          <Link
-                            key={item.path}
-                            to={item.path}
-                            className="block py-2 px-4 text-gray-600 hover:bg-gray-50 rounded-lg text-sm transition-colors"
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            {item.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Botones de autenticación (solo para no logueados) */}
-              {!user && (
-                <div className="border-t border-gray-200 pt-4 space-y-2">
-                  <Button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setShowLoginModal(true);
-                    }}
-                    className="w-full bg-orange-600 hover:bg-orange-700 transition-colors"
-                  >
-                    Iniciar sesión
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setShowRegisterModal(true);
-                    }}
-                    variant="outline"
-                    className="w-full border-gray-300 hover:bg-gray-50 transition-colors"
-                  >
-                    Crear cuenta
-                  </Button>
-                </div>
-              )}
+        <div
+          ref={menuRef}
+          className={`
+          absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-200 
+          max-h-[80vh] overflow-y-auto z-40 transition-all duration-300 ease-in-out
+          ${
+            isMenuOpen
+              ? "translate-y-0 opacity-100"
+              : "-translate-y-4 opacity-0 pointer-events-none"
+          }
+        `}
+        >
+          <div className="p-4">
+            {/* Navegación principal */}
+            <div className="space-y-1">
+              <Link
+                to="/"
+                className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                  isActiveRoute("/")
+                    ? "text-orange-600 bg-orange-50"
+                    : "text-gray-800 hover:bg-gray-50"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Inicio
+              </Link>
+              <Link
+                to="/productos"
+                className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                  isActiveRoute("/productos")
+                    ? "text-orange-600 bg-orange-50"
+                    : "text-gray-800 hover:bg-gray-50"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Productos
+              </Link>
+              <Link
+                to="/sofas"
+                className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                  isActiveRoute("/sofas")
+                    ? "text-orange-600 bg-orange-50"
+                    : "text-gray-800 hover:bg-gray-50"
+                }`}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sofás
+              </Link>
             </div>
+
+            {/* Categorías desplegables */}
+            <div>
+              {categories.map((category) => (
+                <div key={category.title} className="mb-2">
+                  <button
+                    onClick={() => toggleCategory(category.title)}
+                    className="flex items-center justify-between w-full py-3 px-4 text-gray-800 hover:bg-gray-50 rounded-lg font-medium transition-colors"
+                  >
+                    <span>{category.title}</span>
+                    {openCategories.includes(category.title) ? (
+                      <ChevronDown className="w-5 h-5" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5" />
+                    )}
+                  </button>
+
+                  {openCategories.includes(category.title) && (
+                    <div className="ml-4 space-y-1 mt-1 animate-in fade-in duration-200">
+                      {category.items.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className={`block py-2 px-4 rounded-lg text-sm transition-colors ${
+                            isActiveRoute(item.path)
+                              ? "text-orange-600 bg-orange-50 font-medium"
+                              : "text-gray-600 hover:bg-gray-50"
+                          }`}
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Botones de autenticación (solo para no logueados) */}
+            {!user && (
+              <div className="border-t border-gray-200 pt-4 space-y-2">
+                <Button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setShowLoginModal(true);
+                  }}
+                  className="w-full bg-orange-600 hover:bg-orange-700 transition-colors"
+                >
+                  Iniciar sesión
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setShowRegisterModal(true);
+                  }}
+                  variant="outline"
+                  className="w-full border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                  Crear cuenta
+                </Button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Modales */}
