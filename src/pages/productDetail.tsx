@@ -476,13 +476,15 @@ function ProductDetail() {
                     className="related-card flex-none w-[70vw] max-w-sm border border-gray-300 bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all group snap-start"
                   >
                     {/* Imagen del producto */}
-                    <div className="aspect-square w-full overflow-hidden relative cursor-pointer">
-                      <img
-                        src={prod.imagen_url}
-                        alt={prod.nombre}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
+                    <Link to={`/productos/${prod.id}`} className="block">
+                      <div className="aspect-square w-full overflow-hidden relative cursor-pointer">
+                        <img
+                          src={prod.imagen_url}
+                          alt={prod.nombre}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    </Link>
 
                     {/* Información del producto */}
                     <div className="p-4 space-y-3">
