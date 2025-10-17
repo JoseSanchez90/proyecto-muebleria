@@ -422,7 +422,7 @@ function NavbarMobile() {
         {isMenuOpen && (
           <div
             ref={menuRef}
-            className="absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-200 max-h-[80vh] overflow-y-auto animate-in slide-in-from-top duration-200"
+            className="fixed top-[64px] left-0 w-full bg-white shadow-lg border-t border-gray-200 max-h-[calc(100vh-64px)] overflow-y-auto animate-in slide-in-from-top duration-200 z-40"
           >
             <div className="p-4 space-y-4">
               {/* Navegación principal */}
