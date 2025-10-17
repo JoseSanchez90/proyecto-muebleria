@@ -99,9 +99,23 @@ export const useFavorites = () => {
       queryClient.invalidateQueries({ queryKey: ["favorites", user?.id] });
 
       if (action === "added") {
-        toast.success("Producto agregado a favoritos");
+        toast("Producto agregado a favoritos", {
+          style: {
+            border: "1px solid #e2e8f0",
+            padding: "10px",
+            color: "#314155",
+          },
+          icon: "❤️",
+        });
       } else {
-        toast.success("Producto removido de favoritos");
+        toast("Producto removido de favoritos", {
+          style: {
+            border: "1px solid #e2e8f0",
+            padding: "10px",
+            color: "#314155",
+          },
+          icon: "💔",
+        });
       }
     },
     onError: (error) => {
@@ -112,7 +126,7 @@ export const useFavorites = () => {
           padding: "10px",
           color: "#314155",
         },
-        icon: '⚠️',
+        icon: "⚠️",
       });
     },
   });

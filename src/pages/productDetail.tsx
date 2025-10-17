@@ -165,41 +165,6 @@ function ProductDetail() {
                 S/ {producto.precio.toFixed(2)}
               </div>
 
-              {/* Opciones */}
-              {/* <div className="space-y-6 mb-8">
-                <Select>
-                  <label className="block text-sm font-semibold mb-3">
-                    Color
-                  </label>
-                  <SelectTrigger className="w-full border border-gray-400 bg-white">
-                    <SelectValue placeholder="Selecciona el color" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="roble">Roble Natural</SelectItem>
-                      <SelectItem value="negro">Negro</SelectItem>
-                      <SelectItem value="blanco">Blanco</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-
-                <Select>
-                  <label className="block text-sm font-semibold mb-3">
-                    Material
-                  </label>
-                  <SelectTrigger className="w-full border border-gray-400 bg-white">
-                    <SelectValue placeholder="Selecciona el material" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="tela">Tela</SelectItem>
-                      <SelectItem value="cuero">Cuero</SelectItem>
-                      <SelectItem value="madera">Madera</SelectItem>
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div> */}
-
               {/* Cantidad y botones */}
               <div className="flex gap-6 mb-10">
                 <div className="flex items-center bg-white border border-gray-300 rounded-lg">
