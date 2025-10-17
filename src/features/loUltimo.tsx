@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "../lib/supabaseClient";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/cart/useCart";
 import toast from "react-hot-toast";
@@ -20,8 +20,10 @@ interface Producto {
 function LoUltimo() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Cargar productos de Supabase
   useEffect(() => {
@@ -55,7 +57,7 @@ function LoUltimo() {
     loadProductos();
   }, []);
 
-const handleComprar = (producto: Producto) => {
+  const handleComprar = (producto: Producto) => {
     addToCart({ product: producto, quantity: 1 });
 
     toast.custom((t) => (
@@ -87,6 +89,33 @@ const handleComprar = (producto: Producto) => {
     ));
   };
 
+  // Navegación del carousel
+  const nextSlide = () => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const cardWidth =
+        container.querySelector(".carousel-card")?.clientWidth || 0;
+      const gap = 24; // gap-6 = 24px
+      const scrollAmount = cardWidth + gap;
+
+      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      setCurrentIndex((prev) => Math.min(prev + 1, productos.length - 1));
+    }
+  };
+
+  const prevSlide = () => {
+    if (scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const cardWidth =
+        container.querySelector(".carousel-card")?.clientWidth || 0;
+      const gap = 24; // gap-6 = 24px
+      const scrollAmount = cardWidth + gap;
+
+      container.scrollBy({ left: -scrollAmount, behavior: "smooth" });
+      setCurrentIndex((prev) => Math.max(prev - 1, 0));
+    }
+  };
+
   if (loading) {
     return (
       <section className="py-8">
@@ -99,74 +128,177 @@ const handleComprar = (producto: Producto) => {
   }
 
   return (
-    <section>
+    <section className="relative">
       {productos.length > 0 ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 2xl:gap-12">
-          {productos.map((producto) => (
-            <div
-              key={producto.id}
-              className="border border-gray-300 bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all group"
-            >
-              {/* Imagen del producto */}
-              <div
-                className="aspect-square w-full h-60 2xl:h-96 overflow-hidden relative cursor-pointer"
-                onClick={() => navigate(`/productos/${producto.id}`)}
+        <>
+          {/* Controles del carousel - Solo en móvil */}
+          <div className="flex justify-between items-center mb-4 lg:hidden">
+            <h2 className="text-2xl font-bold text-gray-900">Lo último</h2>
+            <div className="flex gap-2">
+              <button
+                onClick={prevSlide}
+                disabled={currentIndex === 0}
+                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <img
-                  src={producto.imagen_url}
-                  alt={producto.nombre}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    console.error(
-                      "Error al cargar imagen:",
-                      producto.imagen_url
-                    );
-                    e.currentTarget.src =
-                      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImagen no disponible%3C/text%3E%3C/svg%3E';
-                  }}
-                />
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                onClick={nextSlide}
+                disabled={currentIndex === productos.length - 1}
+                className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
 
-                {/* Badge de categoría */}
-                <div className="absolute top-3 left-3">
-                  <span className="bg-orange-500 px-3 py-1 rounded-full text-xs font-semibold text-white">
-                    {producto.categoria}
-                  </span>
-                </div>
-              </div>
-
-              {/* Información del producto */}
-              <div className="p-4 space-y-3">
-                {/* Nombre del producto */}
-                <h3 className="font-bold text-lg line-clamp-1">
-                  {producto.nombre}
-                </h3>
-
-                {/* Descripción */}
-                <p className="text-gray-600 text-sm line-clamp-2 min-h-[2.5rem]">
-                  {producto.descripcion}
-                </p>
-
-                {/* Precio */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xl 2xl:text-2xl font-bold text-gray-900">
-                    S/ {producto.precio.toFixed(2)}
-                  </span>
-                </div>
-
-                {/* Botón de comprar */}
-                <Button
-                  size="lg"
-                  onClick={() => handleComprar(producto)}
-                  disabled={producto.stock === 0}
-                  className="w-full cursor-pointer"
+          {/* Contenedor del carousel */}
+          <div className="relative">
+            {/* Grid para desktop */}
+            <div className="hidden lg:grid lg:grid-cols-4 gap-6 2xl:gap-12">
+              {productos.slice(0, 4).map((producto) => (
+                <div
+                  key={producto.id}
+                  className="border border-gray-300 bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all group"
                 >
-                  <ShoppingCart className="w-4 h-4" />
-                  {producto.stock === 0 ? "Agotado" : "Agregar al carrito"}
-                </Button>
+                  {/* Imagen del producto */}
+                  <div
+                    className="aspect-square w-full h-60 2xl:h-96 overflow-hidden relative cursor-pointer"
+                    onClick={() => navigate(`/productos/${producto.id}`)}
+                  >
+                    <img
+                      src={producto.imagen_url}
+                      alt={producto.nombre}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        console.error(
+                          "Error al cargar imagen:",
+                          producto.imagen_url
+                        );
+                        e.currentTarget.src =
+                          'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImagen no disponible%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+
+                    {/* Badge de categoría */}
+                    <div className="absolute top-3 left-3">
+                      <span className="bg-orange-500 px-3 py-1 rounded-full text-xs font-semibold text-white">
+                        {producto.categoria}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Información del producto */}
+                  <div className="p-4 space-y-3">
+                    {/* Nombre del producto */}
+                    <h3 className="font-bold text-lg line-clamp-1">
+                      {producto.nombre}
+                    </h3>
+
+                    {/* Descripción */}
+                    <p className="text-gray-600 text-sm line-clamp-2 min-h-[2.5rem]">
+                      {producto.descripcion}
+                    </p>
+
+                    {/* Precio */}
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl 2xl:text-2xl font-bold text-gray-900">
+                        S/ {producto.precio.toFixed(2)}
+                      </span>
+                    </div>
+
+                    {/* Botón de comprar */}
+                    <Button
+                      size="lg"
+                      onClick={() => handleComprar(producto)}
+                      disabled={producto.stock === 0}
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white cursor-pointer"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      {producto.stock === 0 ? "Agotado" : "Agregar al carrito"}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Carousel para móvil */}
+            <div className="lg:hidden">
+              <div
+                ref={scrollContainerRef}
+                className="flex overflow-x-auto scrollbar-hide gap-6 pb-4 snap-x snap-mandatory"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              >
+                {productos.map((producto) => (
+                  <div
+                    key={producto.id}
+                    className="carousel-card flex-none w-[70vw] max-w-sm border border-gray-300 bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all group snap-start"
+                  >
+                    {/* Imagen del producto */}
+                    <div
+                      className="aspect-square w-full h-60 overflow-hidden relative cursor-pointer"
+                      onClick={() => navigate(`/productos/${producto.id}`)}
+                    >
+                      <img
+                        src={producto.imagen_url}
+                        alt={producto.nombre}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          console.error(
+                            "Error al cargar imagen:",
+                            producto.imagen_url
+                          );
+                          e.currentTarget.src =
+                            'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImagen no disponible%3C/text%3E%3C/svg%3E';
+                        }}
+                      />
+
+                      {/* Badge de categoría */}
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-orange-500 px-3 py-1 rounded-full text-xs font-semibold text-white">
+                          {producto.categoria}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Información del producto */}
+                    <div className="p-4 space-y-3">
+                      {/* Nombre del producto */}
+                      <h3 className="font-bold text-lg line-clamp-1">
+                        {producto.nombre}
+                      </h3>
+
+                      {/* Descripción */}
+                      <p className="text-gray-600 text-sm line-clamp-2 min-h-[2.5rem]">
+                        {producto.descripcion}
+                      </p>
+
+                      {/* Precio */}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-bold text-gray-900">
+                          S/ {producto.precio.toFixed(2)}
+                        </span>
+                      </div>
+
+                      {/* Botón de comprar */}
+                      <Button
+                        size="lg"
+                        onClick={() => handleComprar(producto)}
+                        disabled={producto.stock === 0}
+                        className="w-full bg-orange-600 hover:bg-orange-700 text-white cursor-pointer"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        {producto.stock === 0
+                          ? "Agotado"
+                          : "Agregar al carrito"}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        </>
       ) : (
         <div className="text-center py-12">
           <p className="text-xl text-gray-500">No hay productos disponibles</p>

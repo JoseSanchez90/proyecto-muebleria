@@ -147,7 +147,7 @@ function Home() {
   });
 
   return (
-    <main className="min-h-screen px-20 bg-gray-100 pt-6 2xl:pt-8">
+    <main className="min-h-screen px-2 lg:px-20 bg-gray-100 pt-6 2xl:pt-8">
       {/* MOSTRAR SKELETON O CAROUSEL (no ambos) */}
       {loading ? (
         // SPINNER elegante
@@ -169,7 +169,7 @@ function Home() {
         </section>
       ) : (
         // CAROUSEL cuando terminó de cargar
-        <section className="relative xl:h-[30rem] 2xl:h-[48rem] overflow-hidden rounded-3xl">
+        <section className="relative h-[35rem] md:h-[30rem] 2xl:h-[48rem] overflow-hidden rounded-3xl">
           {slides.map((slide, index) => (
             <div
               key={slide.id}
@@ -201,16 +201,16 @@ function Home() {
                   />
                 )}
                 {/* Overlay para mejor contraste del texto */}
-                <div className="absolute inset-0 bg-black/40"></div>
+                <div className="absolute inset-0 bg-black/50"></div>
               </div>
 
               {/* Contenido del slide */}
-              <div className="relative h-full flex items-center justify-end px-8">
-                <div className="max-w-2xl text-right text-white">
-                  <h2 className="text-5xl lg:text-6xl font-bold mb-4">
+              <div className="relative h-full flex items-center justify-center lg:justify-end px-4 lg:px-8">
+                <div className="max-w-2xl text-center lg:text-right text-white">
+                  <h2 className="text-3xl lg:text-6xl font-bold mb-4">
                     {slide.title}
                   </h2>
-                  <p className="text-xl md:text-2xl font-medium opacity-90">
+                  <p className="text-lg md:text-2xl font-medium opacity-90">
                     {slide.subtitle}
                   </p>
                 </div>
@@ -219,11 +219,11 @@ function Home() {
           ))}
 
           {/* Controles de navegación */}
-          <div className="absolute bottom-8 right-8 md:bottom-6 md:right-8 flex gap-4 z-10">
+          <div className="absolute bottom-5 right-5 md:bottom-6 md:right-8 flex gap-4 z-10">
             <Button
               onClick={prevSlide}
               disabled={isAnimating}
-              className="w-10 h-10 rounded-full cursor-pointer bg-white hover:bg-gray-300 text-black shadow-lg backdrop-blur-sm"
+              className="w-8 h-8 lg:w-10 lg:h-10 rounded-full cursor-pointer bg-white hover:bg-gray-300 text-black shadow-lg backdrop-blur-sm"
               size="icon"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -231,7 +231,7 @@ function Home() {
             <Button
               onClick={nextSlide}
               disabled={isAnimating}
-              className="w-10 h-10 rounded-full cursor-pointer bg-white hover:bg-gray-300 text-black shadow-lg backdrop-blur-sm"
+              className="w-8 h-8 lg:w-10 lg:h-10 rounded-full cursor-pointer bg-white hover:bg-gray-300 text-black shadow-lg backdrop-blur-sm"
               size="icon"
             >
               <ChevronRight className="w-6 h-6" />
@@ -262,34 +262,34 @@ function Home() {
       )}
 
       {/* El resto de tu contenido */}
-      <section className="w-full h-full pt-24 space-y-16">
-        <div className="flex flex-col gap-6 2xl:gap-10">
-          <h2 className="text-3xl font-bold">Nuestros más vendidos</h2>
+      <section className="w-full h-full pt-10 lg:pt-24 space-y-6 lg:space-y-16">
+        <div className="flex flex-col gap-6 2xl:gap-10 pl-4 md:pl-0">
+          <h2 className="hidden md:flex text-3xl font-bold">Nuestros más vendidos</h2>
           <div>
             <MasVendidos />
           </div>
         </div>
-        <div className="flex flex-col gap-6 2xl:gap-10">
-          <h2 className="text-3xl font-bold">Lo último en llegar</h2>
+        <div className="flex flex-col gap-6 2xl:gap-10 pl-4 md:pl-0">
+          <h2 className="hidden md:flex text-3xl font-bold">Lo último en llegar</h2>
           <div>
             <LoUltimo />
           </div>
         </div>
       </section>
 
-      <section className="py-24">
-        <div className="flex justify-between items-center bg-white p-16 border border-gray-300 rounded-2xl">
-          <div className="flex flex-col gap-2">
-            <h3 className="text-3xl font-semibold">
+      <section className="py-12 lg:py-24">
+        <div className="flex flex-col text-center md:text-start lg:flex-row lg:justify-between items-center bg-white py-16 px-4 lg:px-16 border border-gray-300 rounded-2xl gap-10">
+          <div className="flex flex-col gap-4 lg:gap-2">
+            <h3 className="text-2xl lg:text-3xl font-semibold">
               Descubre nuestra colección de sofás modernos
             </h3>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg lg:text-lg text-gray-600">
               Crea el espacio perfecto con diseño versátiles
             </p>
           </div>
           <div>
             <Link to="/sofas">
-              <Button size="lg" className="py-6 px-12 cursor-pointer">
+              <Button size="lg" className="bg-orange-600 hover:bg-orange-700 text-white py-6 px-12 cursor-pointer">
                 Ver ahora
               </Button>
             </Link>

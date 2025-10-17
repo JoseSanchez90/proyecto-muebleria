@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { IoIosSearch } from "react-icons/io";
 import { IMAGES } from "@/assets/images";
 import { CategoryMenuItem } from "../common/categoryMenuItem";
-import { Link } from "react-router-dom";
-import { LogOut, ShoppingCart } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { LogOut, ShoppingCart, X } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useEffect, useRef, useState } from "react";
 import LoginModal from "@/pages/loginModal";
@@ -18,6 +18,7 @@ import ForgotPasswordModal from "@/pages/forgotPasswordModal";
 import toast from "react-hot-toast";
 import { useCart } from "@/hooks/cart/useCart";
 import { useProfile } from "@/hooks/useProfile";
+import { useProducts } from "@/hooks/products/useProducts";
 
 function NavbarDesktop() {
   const { user, signOut } = useAuth();
@@ -28,9 +29,65 @@ function NavbarDesktop() {
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const { totalItems, isLoading } = useCart();
-
-  // USAR REACT QUERY PARA DATOS DEL PERFIL
   const { data: profileData } = useProfile(user?.id);
+  const navigate = useNavigate();
+  // Usa tu hook de React Query para obtener los productos
+  const { products: allProducts, isLoading: productsLoading } = useProducts();
+  // Estados para la búsqueda
+  const [searchQuery, setSearchQuery] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  // Función de búsqueda en tiempo real
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+
+    if (query.trim().length === 0) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    // Si los productos aún están cargando, no hacer búsqueda
+    if (productsLoading || !allProducts) {
+      return;
+    }
+
+    const filtered = allProducts.filter(
+      (product) =>
+        product.name.toLowerCase().includes(query.toLowerCase()) ||
+        (product.category &&
+          product.category.toLowerCase().includes(query.toLowerCase()))
+    );
+
+    setSearchResults(filtered);
+    setShowSearchResults(true);
+  };
+
+  // Realizar búsqueda completa
+  const performSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/productos?search=${encodeURIComponent(searchQuery)}`);
+      setShowSearchResults(false);
+      setSearchQuery("");
+    }
+  };
+
+  // Navegar a producto desde resultado
+  const handleResultClick = (productId: string) => {
+    navigate(`/productos/${productId}`);
+    setShowSearchResults(false);
+    setSearchQuery("");
+  };
+
+  // Manejar tecla Enter
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      performSearch();
+    }
+  };
 
   // Cerrar sesión
   const handleSignOut = async () => {
@@ -139,12 +196,98 @@ function NavbarDesktop() {
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex items-center justify-center gap-6">
-          <div className="flex">
-            <IoIosSearch className="relative w-5 h-5 left-7 top-2" />
+          {/* Búsqueda con resultados en tiempo real */}
+          <div className="flex relative" ref={searchRef}>
+            <IoIosSearch className="relative w-5 h-5 left-7 top-2 text-gray-400" />
             <Input
               className="pl-9 w-64 2xl:w-80 bg-white"
-              placeholder="Buscar"
+              placeholder="Buscar productos..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              onKeyPress={handleKeyPress}
+              onFocus={() => searchQuery.trim() && setShowSearchResults(true)}
             />
+
+            {/* Botón para limpiar búsqueda */}
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setShowSearchResults(false);
+                }}
+                className="absolute right-3 top-2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Resultados de búsqueda */}
+            {showSearchResults && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                {productsLoading ? (
+                  // Loading state
+                  <div className="px-4 py-6 text-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600 mx-auto"></div>
+                    <p className="text-gray-500 text-sm mt-2">
+                      Buscando productos...
+                    </p>
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <>
+                    {/* Resultados encontrados */}
+                    {searchResults.slice(0, 8).map((product) => (
+                      <button
+                        key={product.id}
+                        onClick={() => handleResultClick(product.id)}
+                        className="w-full text-left px-2 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors group cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-14 h-14 rounded object-cover flex-shrink-0"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 group-hover:text-orange-600 truncate">
+                              {product.name}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {product.category}
+                            </p>
+                          </div>
+                          {/* <span className="text-sm font-semibold text-orange-600 ml-4 whitespace-nowrap">
+                            S/ {product.price}
+                          </span> */}
+                        </div>
+                      </button>
+                    ))}
+
+                    {/* Ver todos los resultados */}
+                    {searchResults.length > 8 && (
+                      <button
+                        onClick={performSearch}
+                        className="w-full text-center px-4 py-3 bg-gray-50 hover:bg-gray-100 text-sm font-medium text-orange-600 transition-colors border-t border-gray-100"
+                      >
+                        Ver todos los resultados ({searchResults.length})
+                      </button>
+                    )}
+                  </>
+                ) : searchQuery.trim() ? (
+                  // Sin resultados
+                  <div className="px-4 py-6 text-center">
+                    <p className="text-gray-500 text-sm">
+                      No se encontraron productos para "{searchQuery}"
+                    </p>
+                    <button
+                      onClick={performSearch}
+                      className="mt-2 text-sm text-orange-600 hover:text-orange-700 font-medium"
+                    >
+                      Buscar en todos los productos
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            )}
           </div>
 
           {/* Iconos de usuario y carrito */}

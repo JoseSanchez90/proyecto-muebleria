@@ -102,16 +102,20 @@ function Favorites() {
   // Redirigir si no está logueado
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-100 py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-black mb-12">Mis Favoritos</h1>
-          <div className="text-center py-20">
-            <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg mb-4">
+      <div className="min-h-screen bg-gray-100 py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-8 sm:mb-12">
+            Mis Favoritos
+          </h1>
+          <div className="text-center py-12 sm:py-20">
+            <Heart className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-base sm:text-lg mb-4">
               Inicia sesión para ver tus favoritos
             </p>
             <Link to="/">
-              <Button className="cursor-pointer">Iniciar Sesión</Button>
+              <Button className="cursor-pointer text-sm sm:text-base">
+                Iniciar Sesión
+              </Button>
             </Link>
           </div>
         </div>
@@ -122,14 +126,16 @@ function Favorites() {
   // Usar favoritesLoading del hook
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 py-12 px-4">
-        <div className="container mx-auto px-4 max-w-5xl 2xl:max-w-6xl">
-          <h2 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
+      <div className="min-h-screen bg-gray-100 py-8 sm:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-8 sm:mb-12">
             Mis Favoritos
           </h2>
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-500">Cargando favoritos...</p>
+          <div className="text-center py-12 sm:py-20">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-500 text-sm sm:text-base">
+              Cargando favoritos...
+            </p>
           </div>
         </div>
       </div>
@@ -138,18 +144,20 @@ function Favorites() {
 
   if (products.length === 0) {
     return (
-      <div className="min-h-screen w-full bg-gray-100 px-4 py-12">
-        <div className="container mx-auto px-4 max-w-5xl 2xl:max-w-6xl">
-          <h2 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
+      <div className="min-h-screen w-full bg-gray-100 py-8 sm:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black mb-8 sm:mb-12">
             Mis Favoritos
           </h2>
-          <div className="text-center py-8 2xl:py-20">
-            <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg mb-4">
+          <div className="text-center py-8 sm:py-12 lg:py-20">
+            <Heart className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-500 text-base sm:text-lg mb-4">
               No tienes productos favoritos aún
             </p>
             <Link to="/">
-              <Button className="cursor-pointer">Explorar Productos</Button>
+              <Button className="cursor-pointer text-sm sm:text-base">
+                Explorar Productos
+              </Button>
             </Link>
           </div>
         </div>
@@ -158,66 +166,73 @@ function Favorites() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-12 px-4">
-      <div className="container mx-auto px-4 max-w-6xl 2xl:max-w-6xl">
-        <h2 className="text-3xl 2xl:text-4xl font-bold text-black mb-12">
-          Mis Favoritos
-        </h2>
+    <div className="min-h-screen bg-gray-100 py-8 sm:py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+        {/* Header */}
+        <div className="mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black">
+            Mis Favoritos
+          </h2>
+          <p className="text-gray-600 text-sm sm:text-base mt-2">
+            {products.length} {products.length === 1 ? "producto" : "productos"}{" "}
+            en tu lista de favoritos
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-6">
+        {/* Grid de productos */}
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {products.map((product) => (
             <div
               key={product.id}
-              className="bg-white border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col h-full"
             >
-              <div className="grid grid-cols-2 2xl:flex 2xl:flex-col justify-between">
-                {/* Imagen del producto */}
-                <div className="bg-gray-100 relative">
-                  <img
-                    src={product.imagen_url}
-                    alt={product.nombre}
-                    className="w-full h-full object-cover"
-                  />
+              {/* Imagen del producto */}
+              <div className="relative bg-gray-100 aspect-square">
+                <img
+                  src={product.imagen_url}
+                  alt={product.nombre}
+                  className="w-full h-full object-cover"
+                />
 
-                  {/* Botón de corazón - actualizado */}
-                  <button
-                    onClick={() => handleToggleFavorite(product.id)}
-                    disabled={isRemoving}
-                    className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-black transition-colors shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                    {isRemoving && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
-                      </div>
-                    )}
-                  </button>
+                {/* Botón de corazón */}
+                <button
+                  onClick={() => handleToggleFavorite(product.id)}
+                  disabled={isRemoving}
+                  className="absolute top-3 right-3 w-8 h-8 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-all duration-200 shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isRemoving ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-500"></div>
+                  ) : (
+                    <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500 fill-red-500" />
+                  )}
+                </button>
+              </div>
+
+              {/* Información del producto */}
+              <div className="flex flex-col flex-1 p-3 sm:p-4">
+                <div className="flex-1 mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-1 sm:mb-2 line-clamp-2">
+                    {product.nombre}
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm line-clamp-2 sm:line-clamp-3">
+                    {product.descripcion}
+                  </p>
                 </div>
 
-                {/* Información del producto */}
-                <div className="2xl:h-60 p-4 flex flex-col justify-between">
-                  <div className="flex flex-col">
-                    <h3 className="text-lg font-semibold text-black mb-2">
-                      {product.nombre}
-                    </h3>
-                    <p className="text-gray-600 text-sm 2xl:line-clamp-2">
-                      {product.descripcion}
-                    </p>
-                  </div>
-                  <div className="flex flex-col">
-                    <p className="text-2xl font-bold text-black mb-4">
-                      S/ {formatPrice(product.precio)}
-                    </p>
+                <div className="mt-auto">
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
+                    S/ {formatPrice(product.precio)}
+                  </p>
 
-                    {/* Botón añadir al carrito */}
-                    <Button
-                      onClick={() => handleAddToCart(product)}
-                      className="w-full cursor-pointer"
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Añadir al carrito
-                    </Button>
-                  </div>
+                  {/* Botón añadir al carrito */}
+                  <Button
+                    onClick={() => handleAddToCart(product)}
+                    className="w-full bg-orange-600 hover:bg-orange-700 text-white cursor-pointer text-xs sm:text-sm"
+                    size="sm"
+                  >
+                    <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
+                    Añadir al carrito
+                  </Button>
                 </div>
               </div>
             </div>
