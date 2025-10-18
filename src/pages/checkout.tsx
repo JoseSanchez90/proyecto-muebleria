@@ -376,7 +376,7 @@ function Checkout() {
                             </p>
                           </div>
                           <img
-                            src="/src/assets/images/yape.webp"
+                            src="/yape.webp"
                             alt="Yape Logo"
                             className="w-10 md:w-12"
                           />
@@ -399,8 +399,8 @@ function Checkout() {
                             </p>
                           </div>
                           <img
-                            src="/src/assets/images/plin.webp"
-                            alt="Yape Logo"
+                            src="/plin.webp"
+                            alt="Plin Logo"
                             className="w-8 md:w-10"
                           />
                         </div>
@@ -425,12 +425,12 @@ function Checkout() {
                           </div>
                           <div className="flex flex-col md:flex-row gap-2 md:gap-4">
                             <img
-                              src="/src/assets/images/visa-logo.png"
+                              src="/visa-logo.png"
                               alt="Visa Logo"
                               className="w-8 md:w-12"
                             />
                             <img
-                              src="/src/assets/images/mastercard-logo.png"
+                              src="/mastercard-logo.png"
                               alt="MasterCard Logo"
                               className="w-8 md:w-12"
                             />
@@ -766,7 +766,7 @@ function PaymentDetails({
           <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center">
             <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
               <img
-                src="/src/assets/images/qr.png"
+                src="/qr.png"
                 alt="QR Yape"
                 className="w-full h-full object-cover"
               />
