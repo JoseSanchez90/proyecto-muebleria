@@ -196,13 +196,13 @@ function Cart() {
                   {/* Controles */}
                   <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-between gap-3 sm:gap-4">
                     {/* Botón eliminar */}
+
                     <Button
                       onClick={() => removeFromCart(item.product_id)}
                       disabled={isRemoving}
-                      className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white p-1 sm:p-2 cursor-pointer disabled:opacity-50 transition-colors order-2 sm:order-1"
+                      className="flex w-8 h-8 rounded-full items-center bg-red-500 hover:bg-red-600 text-white cursor-pointer disabled:opacity-50 transition-colors order-2 sm:order-1"
                     >
-                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                      Eliminar
+                      <Trash2 className="w-4 h-4" />
                     </Button>
 
                     {/* Cantidad */}
@@ -345,7 +345,7 @@ function Cart() {
                       />
                     </>
                   ) : (
-                    <Link to="/checkout">
+                    <Link to="/verificacion-de-pago">
                       <Button
                         size="lg"
                         className="w-full cursor-pointer flex gap-2 sm:gap-4 text-sm sm:text-base"

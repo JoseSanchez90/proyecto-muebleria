@@ -4,12 +4,13 @@ import MainLayout from "@/components/layout/mainLayout";
 import Favorites from "@/pages/favorites";
 import Orders from "@/pages/orders";
 import Loader from "@/components/common/loader";
-// import Checkout from "@/pages/checkout";
 
 // Lazy load de las páginas
 const Home = lazy(() => import("@/pages/home"))
 const Cart = lazy(() => import("@/pages/cart"))
 const Profile = lazy(() => import("@/pages/profile"))
+const Checkout = lazy(() => import("@/pages/checkout"))
+const PaymentSuccess = lazy (() => import("@/pages/payment-success"))
 const Products = lazy(() => import("@/pages/products"))
 const ProductDetail = lazy(() => import("@/pages/productDetail"))
 const Sofa = lazy(() => import("@/pages/sofa"))
@@ -28,7 +29,8 @@ const router = createBrowserRouter([
       { path: "/perfil", element: <Profile /> },
       { path: "/productos", element: <Products /> },
       { path: "/productos/:id", element: <ProductDetail /> },
-      // { path: "/verificacion-de-pago", element: <Checkout /> },
+      { path: "/verificacion-de-pago", element: <Checkout /> },
+      { path: "/pago-exitoso", element: <PaymentSuccess /> },
       { path: "/mis-favoritos", element: <Favorites /> },
       { path: "/mis-pedidos", element: <Orders /> },
       { path: "/sofas", element: <Sofa /> },
