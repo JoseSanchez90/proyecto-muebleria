@@ -722,7 +722,7 @@ function Products() {
                               S/ {formatPrice(product.price)}
                             </span>
                             {product.stock < 10 && product.stock > 0 && (
-                              <span className="flex lg:flex-col text-xs text-orange-600 font-medium">
+                              <span className="flex lg:flex-col text-xs gap-1 text-orange-600 font-medium">
                                 <p>Quedan {product.stock}</p>
                                 <p>unidades</p>
                               </span>
