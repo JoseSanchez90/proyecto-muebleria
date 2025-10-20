@@ -52,12 +52,12 @@ function Products() {
   const { toggleFavorite, isFavorite, isToggling } = useFavorites();
   const { user } = useAuth();
   const [showFilters, setShowFilters] = useState(false);
-  const itemsPerPage = 20;
+  const itemsPerPage = 12;
 
   // Estado para los filtros
   const [filters, setFilters] = useState<Filters>({
     categories: [],
-    priceRange: [0, 10000], // Rango inicial amplio
+    priceRange: [0, 10000], // Rango fijo de 0 a 10000
     sortBy: "newest",
   });
 
@@ -129,13 +129,17 @@ function Products() {
   };
 
   const handlePriceRangeChange = (min: number, max: number) => {
-    // Asegurar que min no sea mayor que max y viceversa
-    const adjustedMin = Math.min(Math.max(min, priceRange[0]), priceRange[1]);
-    const adjustedMax = Math.max(Math.min(max, priceRange[1]), priceRange[0]);
+    // Validaciones para inputs libres
+    const adjustedMin = Math.max(0, Math.min(min, 10000)); // Mínimo: 0, Máximo: 10000
+    const adjustedMax = Math.max(0, Math.min(max, 10000)); // Mínimo: 0, Máximo: 10000
+
+    // Asegurar que min no sea mayor que max
+    const finalMin = Math.min(adjustedMin, adjustedMax);
+    const finalMax = Math.max(adjustedMin, adjustedMax);
 
     setFilters((prev) => ({
       ...prev,
-      priceRange: [adjustedMin, adjustedMax],
+      priceRange: [finalMin, finalMax],
     }));
     setCurrentPage(1);
   };
@@ -175,7 +179,7 @@ function Products() {
       <div
         className={`${
           t.visible ? "animate-custom-enter" : "animate-custom-leave"
-        } max-w-xs w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-gray-300 ring-opacity-5`}
+        } max-w-xs w-full bg-[#FF9340] shadow-lg rounded-lg pointer-events-auto flex`}
       >
         <div className="flex-1 w-0 p-2">
           <div className="flex items-center justify-center">
@@ -187,10 +191,10 @@ function Products() {
               />
             </div>
             <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-gray-900 line-clamp-1">
+              <p className="text-sm font-bold text-white line-clamp-1">
                 {product.name}
               </p>
-              <p className="mt-1 text-sm text-gray-500">
+              <p className="mt-1 text-sm text-white font-medium">
                 ¡Agregado al carrito!
               </p>
             </div>
@@ -430,13 +434,13 @@ function Products() {
               </div>
             </div>
 
-            {/* Filtro por rango de precio con shadcn/ui - Versión con inputs */}
+            {/* Filtro por rango de precio con shadcn/ui - Versión con inputs libres */}
             <div className="mb-8">
               <h3 className="font-medium text-gray-900 mb-4">
                 Rango de Precio
               </h3>
               <div className="space-y-6">
-                {/* Inputs numéricos */}
+                {/* Inputs numéricos libres */}
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <Label
@@ -453,14 +457,20 @@ function Products() {
                         id="min-price"
                         type="number"
                         value={filters.priceRange[0]}
-                        onChange={(e) =>
-                          handlePriceRangeChange(
-                            Number(e.target.value),
+                        onChange={(e) => {
+                          const newMin = Number(e.target.value);
+                          // Permitir cualquier valor desde 0, pero máximo no puede ser menor que mínimo
+                          const adjustedMax = Math.max(
+                            newMin,
                             filters.priceRange[1]
-                          )
-                        }
-                        min={priceRange[0]}
-                        max={filters.priceRange[1]}
+                          );
+                          handlePriceRangeChange(
+                            Math.max(0, newMin), // Mínimo permitido: 0
+                            adjustedMax
+                          );
+                        }}
+                        min="0"
+                        max="10000"
                         className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                     </div>
@@ -480,35 +490,52 @@ function Products() {
                         id="max-price"
                         type="number"
                         value={filters.priceRange[1]}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const newMax = Number(e.target.value);
+                          // Permitir cualquier valor hasta 10000, pero mínimo no puede ser mayor que máximo
+                          const adjustedMin = Math.min(
+                            newMax,
+                            filters.priceRange[0]
+                          );
                           handlePriceRangeChange(
-                            filters.priceRange[0],
-                            Number(e.target.value)
-                          )
-                        }
-                        min={filters.priceRange[0]}
-                        max={priceRange[1]}
+                            adjustedMin,
+                            Math.min(10000, Math.max(0, newMax)) // Máximo permitido: 10000
+                          );
+                        }}
+                        min="0"
+                        max="10000"
                         className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Slider */}
+                {/* Slider de un solo punto para precio máximo */}
                 <div className="px-2">
+                  <div className="mb-2">
+                    <Label className="text-sm text-gray-700">
+                      Precio máximo: S/ {formatPrice(filters.priceRange[1])}
+                    </Label>
+                  </div>
                   <Slider
-                    value={filters.priceRange}
-                    min={priceRange[0]}
-                    max={priceRange[1]}
-                    step={1}
-                    onValueChange={(value) =>
-                      handlePriceRangeChange(value[0], value[1])
-                    }
+                    value={[filters.priceRange[1]]} // Solo controlamos el máximo
+                    min={0} // Siempre empieza desde 0
+                    max={10000} // Límite máximo fijo
+                    step={100}
+                    onValueChange={(value) => {
+                      const newMax = value[0];
+                      // Asegurar que el mínimo no sea mayor que el nuevo máximo
+                      const adjustedMin = Math.min(
+                        newMax,
+                        filters.priceRange[0]
+                      );
+                      handlePriceRangeChange(adjustedMin, newMax);
+                    }}
                     className="[&_[role=slider]]:bg-orange-600 [&_[role=slider]]:border-orange-600 [&_[role=slider]]:hover:bg-orange-700 [&_[role=slider]]:focus:bg-orange-700"
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-2">
-                    <span>S/ {formatPrice(priceRange[0])}</span>
-                    <span>S/ {formatPrice(priceRange[1])}</span>
+                    <span>S/ 0</span>
+                    <span>S/ 10,000</span>
                   </div>
                 </div>
               </div>
@@ -601,7 +628,7 @@ function Products() {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 2xl:gap-8 mb-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 2xl:gap-8 mb-12">
                   {currentProducts.map((product) => (
                     <div
                       key={product.id}

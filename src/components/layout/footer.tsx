@@ -49,10 +49,10 @@ function Footer() {
                   Mesas
                 </a>
                 <a
-                  href="/iluminacion"
+                  href="/decoracion"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
-                  Iluminación
+                  Decoración
                 </a>
               </div>
             </div>
@@ -68,12 +68,6 @@ function Footer() {
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Sobre Nosotros
-                </a>
-                <a
-                  href="/blog"
-                  className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
-                >
-                  Blog
                 </a>
                 <a
                   href="/politicas-de-envio"
@@ -100,21 +94,21 @@ function Footer() {
                 className="text-gray-600 hover:text-green-600 transition-colors transform hover:scale-110"
                 aria-label="WhatsApp"
               >
-                <BsWhatsapp className="w-5 h-5 sm:w-6 sm:h-6" />
+                <BsWhatsapp className="w-5 h-5 2xl:w-6 2xl:h-6" />
               </a>
               <a
                 href="https://www.facebook.com/"
                 className="text-gray-600 hover:text-blue-600 transition-colors transform hover:scale-110"
                 aria-label="Facebook"
               >
-                <BsFacebook className="w-5 h-5 sm:w-6 sm:h-6" />
+                <BsFacebook className="w-5 h-5 2xl:w-6 2xl:h-6" />
               </a>
               <a
                 href="https://www.instagram.com/"
                 className="text-gray-600 hover:text-purple-500 transition-colors transform hover:scale-110"
                 aria-label="Instagram"
               >
-                <BsInstagram className="w-5 h-5 sm:w-6 sm:h-6" />
+                <BsInstagram className="w-5 h-5 2xl:w-6 2xl:h-6" />
               </a>
             </div>
           </div>

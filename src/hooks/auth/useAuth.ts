@@ -23,6 +23,7 @@ export const useAuth = () => {
     // Estado (igual que antes)
     user,
     loading: isLoading,
+    isAuthenticated: !!user,
     
     // Acciones (igual que antes)
     signIn: async (email: string, password: string) => {

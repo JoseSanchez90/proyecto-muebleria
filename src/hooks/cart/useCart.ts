@@ -117,7 +117,7 @@ export const useCart = () => {
       // Invalidar queries para refrescar
       queryClient.invalidateQueries({ queryKey: ["cart", user!.id] });
     } catch (error) {
-      console.error("❌ Error sincronizando carrito:", error);
+      console.error("Error sincronizando carrito:", error);
     }
   };
 
@@ -149,7 +149,7 @@ export const useCart = () => {
         .order("created_at", { ascending: true });
 
       if (error) {
-        console.error("❌ Error cargando carrito:", error);
+        console.error("Error cargando carrito:", error);
         throw error;
       }
 
@@ -157,7 +157,8 @@ export const useCart = () => {
       return (data as CartItem[]) || [];
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 2 * 60 * 1000, // 2 minutos
+    gcTime: 10 * 60 * 1000, // 10 minutos
   });
 
   // AGREGAR AL CARRITO - HÍBRIDO (local + usuario)

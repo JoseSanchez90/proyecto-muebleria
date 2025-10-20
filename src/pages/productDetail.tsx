@@ -57,24 +57,23 @@ function ProductDetail() {
       <div
         className={`${
           t.visible ? "animate-custom-enter" : "animate-custom-leave"
-        } max-w-xs w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-gray-300 ring-opacity-5`}
+        } max-w-xs w-full bg-[#FF9340] shadow-lg rounded-lg pointer-events-auto flex`}
       >
         <div className="flex-1 w-0 p-2">
           <div className="flex items-center justify-center">
             <div className="flex-shrink-0 pt-0.5">
               <img
-                className="h-14 w-14 rounded-sm"
+                className="h-14 w-14 rounded-sm object-cover"
                 src={producto.imagen_url}
                 alt={producto.nombre}
               />
             </div>
             <div className="ml-3 flex-1">
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-bold text-white line-clamp-1">
                 {producto.nombre}
               </p>
-              <p className="mt-1 text-sm text-gray-500">
-                ¡Agregado {cantidad} {cantidad === 1 ? "unidad" : "unidades"} al
-                carrito!
+              <p className="mt-1 text-sm text-white font-medium">
+                ¡Agregado al carrito!
               </p>
             </div>
           </div>
@@ -428,22 +427,22 @@ function ProductDetail() {
                               t.visible
                                 ? "animate-custom-enter"
                                 : "animate-custom-leave"
-                            } max-w-xs w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-gray-300 ring-opacity-5`}
+                            } max-w-xs w-full bg-[#ff892f] shadow-lg rounded-lg pointer-events-auto flex`}
                           >
                             <div className="flex-1 w-0 p-2">
                               <div className="flex items-center justify-center">
                                 <div className="flex-shrink-0 pt-0.5">
                                   <img
-                                    className="h-14 w-14 rounded-sm"
-                                    src={prod.imagen_url}
-                                    alt={prod.nombre}
+                                    className="h-14 w-14 rounded-sm object-cover"
+                                    src={producto.imagen_url}
+                                    alt={producto.nombre}
                                   />
                                 </div>
                                 <div className="ml-3 flex-1">
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {prod.nombre}
+                                  <p className="text-sm font-medium text-white line-clamp-1">
+                                    {producto.nombre}
                                   </p>
-                                  <p className="mt-1 text-sm text-gray-500">
+                                  <p className="mt-1 text-sm text-white">
                                     ¡Agregado al carrito!
                                   </p>
                                 </div>
@@ -453,7 +452,7 @@ function ProductDetail() {
                         ));
                       }}
                       disabled={prod.stock === 0}
-                      className="w-full cursor-pointer text-sm"
+                      className="w-full bg-orange-600 hover:bg-orange-700 text-white cursor-pointer"
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       {prod.stock === 0 ? "Agotado" : "Agregar al carrito"}
@@ -529,22 +528,22 @@ function ProductDetail() {
                                 t.visible
                                   ? "animate-custom-enter"
                                   : "animate-custom-leave"
-                              } max-w-xs w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-gray-300 ring-opacity-5`}
+                              } max-w-xs w-full bg-[#ff892f] shadow-lg rounded-lg pointer-events-auto flex`}
                             >
                               <div className="flex-1 w-0 p-2">
                                 <div className="flex items-center justify-center">
                                   <div className="flex-shrink-0 pt-0.5">
                                     <img
-                                      className="h-14 w-14 rounded-sm"
-                                      src={prod.imagen_url}
-                                      alt={prod.nombre}
+                                      className="h-14 w-14 rounded-sm object-cover"
+                                      src={producto.imagen_url}
+                                      alt={producto.nombre}
                                     />
                                   </div>
                                   <div className="ml-3 flex-1">
-                                    <p className="text-sm font-medium text-gray-900">
-                                      {prod.nombre}
+                                    <p className="text-sm font-medium text-white line-clamp-1">
+                                      {producto.nombre}
                                     </p>
-                                    <p className="mt-1 text-sm text-gray-500">
+                                    <p className="mt-1 text-sm text-white">
                                       ¡Agregado al carrito!
                                     </p>
                                   </div>

@@ -6,8 +6,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Input } from "@/components/ui/input";
 import { IoIosSearch } from "react-icons/io";
-import { IMAGES } from "@/assets/images";
-import { CategoryMenuItem } from "../common/categoryMenuItem";
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, ShoppingCart, X } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
@@ -19,6 +17,7 @@ import toast from "react-hot-toast";
 import { useCart } from "@/hooks/cart/useCart";
 import { useProfile } from "@/hooks/useProfile";
 import { useProducts } from "@/hooks/products/useProducts";
+import { useQueryClient } from "@tanstack/react-query";
 
 function NavbarDesktop() {
   const { user, signOut } = useAuth();
@@ -39,6 +38,7 @@ function NavbarDesktop() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
 
   // Función de búsqueda en tiempo real
   const handleSearch = (query: string) => {
@@ -92,14 +92,23 @@ function NavbarDesktop() {
   // Cerrar sesión
   const handleSignOut = async () => {
     setLoggingOut(true);
+    setShowMenu(false); // Cerrar el menú inmediatamente
+
     try {
+      console.log("Iniciando cierre de sesión desde navbar...");
+
+      // Forzar limpieza local ANTES del signOut para mejor UX
+      queryClient.setQueryData(["auth", "user"], null);
+
       await signOut();
+
+      console.log("SignOut completado desde navbar");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       toast.error("Hubo un problema al cerrar sesión.");
     } finally {
       setLoggingOut(false);
-      setShowMenu(false);
+      setShowLoginModal(false)
     }
   };
 
@@ -148,51 +157,21 @@ function NavbarDesktop() {
                 Sofás
               </NavigationMenuLink>
             </NavigationMenuItem>
-            <CategoryMenuItem
-              title="Sillas"
-              items={[
-                { label: "Comedor", path: "/silla/comedor", key: "comedor" },
-                { label: "Oficina", path: "/silla/oficina", key: "oficina" },
-                { label: "Todos", path: "/sillas", key: "" },
-              ]}
-              images={{
-                comedor: IMAGES.sillas.SillaComedor,
-                oficina: IMAGES.sillas.SillaOficina,
-              }}
-              defaultImage={IMAGES.sillas.SillaComedor}
-            />
-            <CategoryMenuItem
-              title="Mesas"
-              items={[
-                { label: "Comedor", path: "/mesas/comedor", key: "comedor" },
-                { label: "Centro", path: "/mesas/centro", key: "centro" },
-                { label: "Todos", path: "/mesas", key: "" },
-              ]}
-              images={{
-                comedor: IMAGES.mesas.MesaComedor,
-                centro: IMAGES.mesas.MesaCentro,
-              }}
-              defaultImage={IMAGES.mesas.MesaComedor}
-            />
-            <CategoryMenuItem
-              title="Decoración"
-              items={[
-                { label: "Cocina", path: "/decoracion/cocina", key: "cocina" },
-                { label: "Baño", path: "/decoracion/baño", key: "baño" },
-                {
-                  label: "Paredes",
-                  path: "/decoracion/paredes",
-                  key: "paredes",
-                },
-                { label: "Todos", path: "/decoracion", key: "" },
-              ]}
-              images={{
-                cocina: IMAGES.decoracion.DecoracionCocina,
-                baño: IMAGES.decoracion.DecoracionBaño,
-                paredes: IMAGES.decoracion.DecoracionParedes,
-              }}
-              defaultImage={IMAGES.decoracion.DecoracionCocina}
-            />
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/sillas" className="font-semibold">
+                Sillas
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/mesas" className="font-semibold">
+                Mesas
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/decoracion" className="font-semibold">
+                Decoración
+              </NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
         <div className="flex items-center justify-center gap-6">

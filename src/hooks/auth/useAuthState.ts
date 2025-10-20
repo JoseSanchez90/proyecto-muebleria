@@ -4,6 +4,9 @@ import { supabase } from "@/lib/supabaseClient";
 import type { User } from "@supabase/supabase-js";
 import { useEffect, useRef } from "react";
 
+// Variables globales para controlar el listener
+let globalAuthListenerSet = false;
+
 export const useAuthState = () => {
   const queryClient = useQueryClient();
   const authListenerSet = useRef(false);
@@ -30,45 +33,55 @@ export const useAuthState = () => {
       console.log("useAuthState: Sesión obtenida", session?.user?.email);
       return session?.user || null;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutos
-    gcTime: 10 * 60 * 1000, // 10 minutos
+    staleTime: 5 * 60 * 1000, // Aumentar a 5 minutos
+    gcTime: 30 * 60 * 1000, // 30 minutos
+    refetchOnWindowFocus: false, // Evitar refetch al cambiar de pestaña
   });
 
-  // Escuchar cambios de autenticación
+  // Escuchar cambios de autenticación - SOLO UNA VEZ GLOBALMENTE
   useEffect(() => {
-    // Evitar múltiples listeners
-    if (authListenerSet.current) {
+    if (globalAuthListenerSet) {
+      console.log("Listener global ya está configurado, omitiendo...");
       return;
     }
 
+    globalAuthListenerSet = true;
     authListenerSet.current = true;
-    console.log("🎧 Configurando listener de auth (solo una vez)...");
+    
+    console.log("Configurando listener GLOBAL de auth...");
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("🔐 Auth state changed:", event);
+    // Configurar el listener una sola vez - SIN guardar la referencia
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event);
 
-      // Actualizar el cache de React Query
+      // Usar setQueryData de manera más eficiente
       queryClient.setQueryData(["auth", "user"], session?.user || null);
 
-      // Invalidar queries dependientes del usuario
-      if (
-        event === "SIGNED_IN" ||
-        event === "SIGNED_OUT" ||
-        event === "USER_UPDATED"
-      ) {
-        console.log("🔄 Invalidando queries dependientes...");
-        queryClient.invalidateQueries({ queryKey: ["cart"] });
-        queryClient.invalidateQueries({ queryKey: ["profile"] });
-        queryClient.invalidateQueries({ queryKey: ["favorites"] });
+      // Invalidar queries dependientes SOLO cuando sea necesario
+      if (event === "SIGNED_OUT") {
+        console.log("Invalidando queries por SIGNED_OUT");
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ["cart"] }),
+          queryClient.invalidateQueries({ queryKey: ["profile"] }),
+          queryClient.invalidateQueries({ queryKey: ["favorites"] }),
+        ]);
+        // Limpiar cache específico
+        queryClient.removeQueries({ queryKey: ["cart"] });
+        queryClient.removeQueries({ queryKey: ["profile"] });
+      } 
+      else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+        console.log("Actualizando queries por:", event);
+        // Para SIGNED_IN, las queries se actualizarán naturalmente
+        // No es necesario invalidar inmediatamente
       }
     });
 
     return () => {
-      console.log("🧹 Limpiando listener de auth...");
-      subscription.unsubscribe();
-      authListenerSet.current = false; // Permitir nuevo listener si se desmonta
+      // Solo limpiar si este es el componente que creó el listener
+      if (authListenerSet.current) {
+        console.log("Componente principal con useAuthState desmontado");
+        // Pero mantenemos el listener global activo para toda la app
+      }
     };
   }, [queryClient]);
 

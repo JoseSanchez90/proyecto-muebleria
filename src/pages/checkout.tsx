@@ -16,12 +16,11 @@ import {
   Shield,
   Edit,
   Plus,
-  Calendar,
   SmartphoneNfc,
   ArrowRight,
-  CheckCircle2,
   CheckCircle,
   Upload,
+  X,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FaMapMarkerAlt } from "react-icons/fa";
@@ -40,7 +39,6 @@ function Checkout() {
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Datos del usuario desde el perfil
   const userName = profileData?.name || user?.user_metadata?.name || "";
@@ -98,68 +96,22 @@ function Checkout() {
   const subtotal = totalPrice;
   const total = subtotal + envio;
 
-  // Calendario - generar fechas desde hoy
-  const generateCalendarDates = () => {
-    const today = new Date();
-    const dates = [];
-
-    for (let i = 1; i <= 14; i++) {
-      // 2 semanas
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      dates.push(date);
-    }
-
-    return dates;
-  };
-
-  const availableDates = generateCalendarDates();
-
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString("es-ES", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-  };
-
-  const formatCalendarDate = (date: Date) => {
-    const weekday = date.toLocaleDateString("es-ES", { weekday: "short" });
-    const day = date.getDate();
-    const month = date.toLocaleDateString("es-ES", { month: "short" });
-
-    return {
-      weekday: weekday.charAt(0).toUpperCase() + weekday.slice(1),
-      day,
-      month: month.charAt(0).toUpperCase() + month.slice(1),
-    };
-  };
-
   const handleProceedToPayment = () => {
     if (!paymentMethod) {
       alert("Por favor selecciona un método de pago");
       return;
     }
-    if (!selectedDate) {
-      alert("Por favor selecciona una fecha de entrega");
-      return;
-    }
     setShowPaymentDetails(true);
   };
 
-  const handlePayment = async () => {
+  const handlePayment = async (method: string) => {
     setIsProcessing(true);
     // Simular procesamiento de pago
     setTimeout(async () => {
       await clearCart(); // Limpiar carrito
       setIsProcessing(false);
-      navigate("/pago-exitoso");
+      navigate(`/pago-exitoso?payment_method=${method}`);
     }, 5000);
-  };
-
-  const isSameDate = (date1: Date, date2: Date) => {
-    return date1.toDateString() === date2.toDateString();
   };
 
   if (items.length === 0) {
@@ -269,85 +221,6 @@ function Checkout() {
               </CardContent>
             </Card>
 
-            {/* Fecha de Entrega */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5 text-orange-600" />
-                  Fecha de Entrega
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-gray-600 text-sm">
-                    Selecciona la fecha en la que deseas recibir tu pedido
-                  </p>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                    {availableDates.map((date, index) => {
-                      const formattedDate = formatCalendarDate(date);
-                      const isSelected =
-                        selectedDate && isSameDate(selectedDate, date);
-
-                      return (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            // Crear una nueva fecha con la misma fecha pero hora fija
-                            const newDate = new Date(date);
-                            newDate.setHours(12, 0, 0, 0);
-                            setSelectedDate(newDate);
-                          }}
-                          className={`p-3 border-2 rounded-lg text-center transition-all duration-200 ${
-                            isSelected
-                              ? "border-orange-500 bg-orange-50 text-orange-700 shadow-lg ring-2 ring-orange-500"
-                              : "border-gray-200 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-25"
-                          }`}
-                        >
-                          <div
-                            className={`text-xs font-medium ${
-                              isSelected ? "text-orange-600" : "text-gray-500"
-                            }`}
-                          >
-                            {formattedDate.weekday}
-                          </div>
-                          <div
-                            className={`text-lg font-bold my-1 ${
-                              isSelected ? "text-orange-800" : "text-gray-900"
-                            }`}
-                          >
-                            {formattedDate.day}
-                          </div>
-                          <div
-                            className={`text-xs ${
-                              isSelected ? "text-orange-600" : "text-gray-600"
-                            }`}
-                          >
-                            {formattedDate.month}
-                          </div>
-                          {index === 0 && (
-                            <div className="text-xs text-green-600 font-medium mt-1">
-                              Más rápido
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {selectedDate && (
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                      <p className="flex items-center gap-2 text-green-800 text-sm">
-                        <CheckCircle2 className="w-5 h-5" />
-                        <strong>Entrega programada para:</strong>{" "}
-                        {formatDate(selectedDate)}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Método de Pago */}
             <Card>
               <CardHeader>
@@ -447,13 +320,13 @@ function Checkout() {
                     <PaymentDetails
                       method={paymentMethod}
                       total={total}
-                      onPayment={handlePayment}
+                      onPayment={handlePayment.bind(null, paymentMethod)}
                       isProcessing={isProcessing}
                     />
                   </div>
                 )}
 
-                {!showPaymentDetails && paymentMethod && selectedDate && (
+                {!showPaymentDetails && paymentMethod && (
                   // <Link to="/pago-exitoso">
                   <Button
                     size="lg"
@@ -513,23 +386,11 @@ function Checkout() {
                     <span>Envío</span>
                     <span>S/ {envio.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between text-lg font-bold border-t pt-2">
+                  <div className="flex justify-between text-lg font-bold pt-2">
                     <span>Total</span>
                     <span>S/ {formatPrice(total)}</span>
                   </div>
                 </div>
-
-                {/* Información de entrega */}
-                {selectedDate && (
-                  <div className="border-t pt-4">
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      📅 Entrega programada
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      {formatDate(selectedDate)}
-                    </p>
-                  </div>
-                )}
 
                 {/* Garantía */}
                 <div className="flex items-center justify-center gap-2 text-xs text-gray-500 pt-4 border-t border-gray-200">
@@ -762,42 +623,75 @@ function PaymentDetails({
         <div className="space-y-4 text-center">
           <h4 className="font-semibold text-lg">Pago con Yape</h4>
 
-          {/* QR Code */}
-          <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center">
-            <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
-              <img
-                src="/qr.png"
-                alt="QR Yape"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="text-sm text-gray-600 mb-2">
-              Escanea el código QR con Yape
-            </p>
-
-            {/* Número de teléfono */}
-            <div className="bg-gray-50 p-3 rounded-lg w-full">
-              <p className="text-xs text-gray-500 mb-1">O Yapea al número:</p>
-              <p className="font-mono font-bold text-lg">999 888 777</p>
-            </div>
-          </div>
-
-          {/* Código de confirmación */}
+          {/* Código de confirmación CON TOOLTIP */}
           <div className="space-y-2">
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 relative">
               <Label htmlFor="confirmationCode" className="text-sm font-medium">
                 Ingresa tu código de aprobación (6 dígitos)
               </Label>
-              <button
-                onClick={() => setShowYapeHelp(true)}
-                className="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer"
-              >
-                ?
-              </button>
+
+              {/* Botón de ayuda con tooltip */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowYapeHelp(!showYapeHelp)}
+                  className="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer transition-colors"
+                >
+                  ?
+                </button>
+
+                {/* Tooltip que se abre arriba del botón */}
+                {showYapeHelp && (
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+                    {/* Flecha indicadora hacia abajo */}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-white"></div>
+
+                    {/* Contenido del tooltip */}
+                    <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-64 relative">
+                      {/* Botón cerrar */}
+                      <button
+                        onClick={() => setShowYapeHelp(false)}
+                        className="absolute top-2 right-2 w-4 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
+                      >
+                        <X className="text-orange-600" />
+                      </button>
+
+                      <h3 className="text-sm text-start font-bold mb-2 text-gray-900 pr-4">
+                        ¿Dónde encuentro mi código?
+                      </h3>
+                      <div className="space-y-1.5 text-start text-xs text-gray-600">
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">1.</span>
+                          <span>Abre tu app de Yape</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">2.</span>
+                          <span>Ve a "Aprobar compras"</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">3.</span>
+                          <span>Dirigete a "Código de aprobación"</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">4.</span>
+                          <span>
+                            Copia el{" "}
+                            <strong>código de 6 dígitos</strong>
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">5.</span>
+                          <span>Ingresa ese código aquí</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+
             <Input
               id="confirmationCode"
-              placeholder="123456"
+              placeholder="xxxxxx"
               maxLength={6}
               value={confirmationCode}
               onChange={(e) =>
@@ -817,38 +711,8 @@ function PaymentDetails({
           >
             {`Pagar S/ ${formatPrice(total)}`}
           </Button>
-
-          {/* Modal de ayuda Yape */}
-          {showYapeHelp && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-              <div className="bg-white rounded-lg p-6 max-w-md w-full animate-in slide-in-from-bottom duration-300">
-                <h3 className="text-lg font-bold mb-4">
-                  ¿Dónde encuentro mi código de aprobación?
-                </h3>
-                <div className="space-y-3 text-sm text-start text-gray-600">
-                  <p>1. Abre tu app de Yape</p>
-                  <p>2. Ve a la sección "Movimientos" o "Historial"</p>
-                  <p>3. Busca la transacción que acabas de realizar</p>
-                  <p>
-                    4. En los detalles de la transacción, verás un{" "}
-                    <strong>código de 6 dígitos</strong>
-                  </p>
-                  <p>5. Ingresa ese código en el campo anterior</p>
-                </div>
-                <div className="mt-6 flex justify-end">
-                  <Button
-                    onClick={() => setShowYapeHelp(false)}
-                    className="bg-orange-600 hover:bg-orange-700 cursor-pointer"
-                  >
-                    Entendido
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       )}
-
       {method === "plin" && (
         <div className="space-y-4 text-center">
           <h4 className="font-semibold text-lg">Pago con Plin</h4>
@@ -857,7 +721,7 @@ function PaymentDetails({
           <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center">
             <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
               <img
-                src="/src/assets/images/qr.png"
+                src="/public/qr.png"
                 alt="QR Plin"
                 className="w-full h-full object-cover"
               />

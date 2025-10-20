@@ -100,21 +100,21 @@ export const useFavorites = () => {
 
       if (action === "added") {
         toast("Producto agregado a favoritos", {
-          style: {
-            border: "1px solid #e2e8f0",
-            padding: "10px",
-            color: "#314155",
-          },
           icon: "❤️",
+          style: {
+            background: "#FF9340",
+            color: "#fff",
+            fontWeight: "bold",
+          },
         });
       } else {
         toast("Producto removido de favoritos", {
-          style: {
-            border: "1px solid #e2e8f0",
-            padding: "10px",
-            color: "#314155",
-          },
           icon: "💔",
+          style: {
+            background: "#FF9340",
+            color: "#fff",
+            fontWeight: "bold",
+          },
         });
       }
     },

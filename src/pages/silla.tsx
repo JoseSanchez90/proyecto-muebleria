@@ -8,7 +8,15 @@ import { useFavorites } from "@/hooks/favorites/useFavorites";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { formatPrice } from "@/utils/formatters";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/hooks/auth/useAuth";
+import { IoShareSocialSharp } from "react-icons/io5";
 
 interface Producto {
   id: string;
@@ -30,10 +38,11 @@ function Sillas() {
   const [filteredProducts, setFilteredProducts] = useState<Producto[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("newest");
-
-  const { addToCart } = useCart();
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const { addToCart, isAdding } = useCart();
   const { toggleFavorite, isFavorite, isToggling } = useFavorites();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   // Cargar productos de la categoría Sillas
   useEffect(() => {
@@ -96,7 +105,10 @@ function Sillas() {
     setFilteredProducts(filtered);
   }, [searchTerm, sortBy, productos]);
 
-  const handleAddToCart = (producto: Producto) => {
+  const handleAddToCart = (producto: Producto, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     addToCart({
       product: {
         id: producto.id,
@@ -110,7 +122,71 @@ function Sillas() {
       quantity: 1,
     });
 
-    toast.success("¡Producto agregado al carrito!");
+    toast.custom((t) => (
+      <div
+        className={`${
+          t.visible ? "animate-custom-enter" : "animate-custom-leave"
+        } max-w-xs w-full bg-[#FF9340] shadow-lg rounded-lg pointer-events-auto flex`}
+      >
+        <div className="flex-1 w-0 p-2">
+          <div className="flex items-center justify-center">
+            <div className="flex-shrink-0 pt-0.5">
+              <img
+                className="h-14 w-14 rounded-sm object-cover"
+                src={producto.imagen_url}
+                alt={producto.nombre}
+              />
+            </div>
+            <div className="ml-3 flex-1">
+              <p className="text-sm font-bold text-white line-clamp-1">
+                {producto.nombre}
+              </p>
+              <p className="mt-1 text-sm text-white font-medium">
+                ¡Agregado al carrito!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ));
+  };
+
+  // función para manejar favoritos con stopPropagation
+  const handleToggleFavorite = (productoId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(productoId);
+  };
+
+  // Función para compartir producto - Versión simplificada
+  const handleShareProduct = async (
+    producto: Producto,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+
+    const productUrl = `${window.location.origin}/productos/${producto.id}`;
+
+    const textToCopy = `${productUrl}`;
+
+    try {
+      // Intentar usar la Clipboard API moderna primero
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(textToCopy);
+      } else {
+        // Fallback para navegadores antiguos
+        const tempInput = document.createElement("input");
+        tempInput.value = textToCopy;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+      }
+
+      toast.success("¡Enlace copiado al portapapeles!");
+    } catch (error) {
+      console.error("Error al copiar al portapapeles:", error);
+      toast.error("Error al copiar el enlace");
+    }
   };
 
   if (loading) {
@@ -183,77 +259,144 @@ function Sillas() {
             {filteredProducts.map((producto) => (
               <div
                 key={producto.id}
-                className="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group"
+                className="border border-gray-300 bg-white rounded-2xl overflow-hidden hover:shadow-lg transition-all group flex flex-col"
+                onMouseEnter={() => setHoveredId(producto.id)}
+                onMouseLeave={() => setHoveredId(null)}
               >
-                {/* Imagen */}
+                {/* código del producto */}
                 <div
-                  className="aspect-square overflow-hidden relative cursor-pointer"
+                  className="aspect-square w-full h-48 2xl:h-60 overflow-hidden relative cursor-pointer"
                   onClick={() => navigate(`/productos/${producto.id}`)}
                 >
                   <img
                     src={producto.imagen_url}
                     alt={producto.nombre}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      console.error(
+                        "Error al cargar imagen:",
+                        producto.imagen_url
+                      );
+                      e.currentTarget.src =
+                        'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect width="400" height="400" fill="%23e5e7eb"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3EImagen no disponible%3C/text%3E%3C/svg%3E';
+                    }}
                   />
 
+                  {/* Overlay con botones */}
+                  <div
+                    className={`hidden lg:flex absolute inset-0 bg-black/40 flex-col items-center justify-center gap-4 transition-opacity duration-300 ${
+                      hoveredId === producto.id ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    <Button
+                      onClick={(e) => handleShareProduct(producto, e)}
+                      className="bg-white text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-orange-600 hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg cursor-pointer"
+                    >
+                      <IoShareSocialSharp className="w-4 h-4" />
+                      Compartir enlace
+                    </Button>
+                    <Button
+                      onClick={(e) => handleAddToCart(producto, e)}
+                      disabled={producto.stock === 0 || isAdding}
+                      className="bg-white text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-orange-600 hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      {isAdding ? "Agregando..." : "Agregar al carrito"}
+                    </Button>
+                    <Button
+                      onClick={(e) => handleToggleFavorite(producto.id, e)}
+                      disabled={isToggling || !user}
+                      className="bg-white text-gray-900 px-6 py-3 rounded-lg font-medium hover:bg-orange-600 hover:text-white transition-all duration-300 flex items-center gap-2 shadow-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Heart
+                        className={`w-4 h-4 ${
+                          isFavorite(producto.id)
+                            ? "fill-red-500 text-red-500"
+                            : "text-gray-400 hover:text-red-500"
+                        }`}
+                      />
+                      Añadir a Favoritos
+                    </Button>
+                  </div>
+
                   {/* Badges */}
-                  <div className="absolute top-3 left-3 flex flex-col gap-2">
+                  <div className="absolute top-2 left-2 flex flex-col gap-2">
                     {producto.mas_vendido && (
                       <span className="bg-purple-600 px-2 py-1 rounded-full text-xs font-semibold text-white">
                         Más Vendido
                       </span>
                     )}
                     {producto.lo_ultimo && (
-                      <span className="bg-blue-600 px-2 py-1 rounded-full text-xs font-semibold text-white">
+                      <span className="bg-[#211C84] px-2 py-1 rounded-full text-xs font-semibold text-white">
+                        Lo último
+                      </span>
+                    )}
+                    {producto.nuevo && (
+                      <span className="bg-green-500 px-2 py-1 rounded-full text-xs font-semibold text-white">
                         Nuevo
                       </span>
                     )}
                   </div>
 
-                  {/* Botón favorito */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(producto.id);
-                    }}
-                    disabled={isToggling}
-                    className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
-                  >
-                    <Heart
-                      className={`w-4 h-4 ${
-                        isFavorite(producto.id)
-                          ? "fill-red-500 text-red-500"
-                          : "text-gray-600"
-                      }`}
-                    />
-                  </button>
+                  {/* Badge de categoría */}
+                  {producto.categoria && (
+                    <div className="absolute top-2 right-2">
+                      <span className="bg-orange-500 px-2 py-1 rounded-full text-xs font-semibold text-white">
+                        {producto.categoria}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Indicador de stock */}
+                  {producto.stock === 0 && (
+                    <div className="absolute bottom-3 left-3">
+                      <span className="bg-red-500 px-2 py-1 rounded-full text-xs font-semibold text-white">
+                        Agotado
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Información */}
-                <div className="p-4 space-y-3">
-                  <h3 className="font-semibold text-gray-900 line-clamp-2">
-                    {producto.nombre}
-                  </h3>
-                  <p className="text-gray-600 text-sm line-clamp-2">
-                    {producto.descripcion}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl font-bold text-gray-900">
-                      S/ {formatPrice(producto.precio)}
-                    </span>
-                    {producto.stock < 10 && producto.stock > 0 && (
-                      <span className="text-xs text-orange-600 font-medium">
-                        {producto.stock} unidades
-                      </span>
-                    )}
+                {/* Información del producto */}
+                <div className="flex flex-col justify-between flex-1 p-4 min-h-[120px]">
+                  <div className="flex-1 min-h-[48px] max-h-[48px] overflow-hidden">
+                    <h3
+                      className="font-semibold text-md cursor-pointer text-gray-800 hover:text-orange-600 transition-colors line-clamp-2"
+                      onClick={() => navigate(`/productos/${producto.id}`)}
+                    >
+                      {producto.nombre}
+                    </h3>
                   </div>
+
+                  <div className="mt-auto pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-md 2xl:text-lg font-bold text-gray-900">
+                        S/ {formatPrice(producto.precio)}
+                      </span>
+                      {producto.stock < 10 && producto.stock > 0 && (
+                        <span className="flex lg:flex-col text-xs gap-1 text-orange-600 font-medium">
+                          <p>Quedan {producto.stock}</p>
+                          <p>unidades</p>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botón de comprar para móvil */}
+                <div className="p-4 pt-0 md:hidden">
                   <Button
+                    size="lg"
                     onClick={() => handleAddToCart(producto)}
-                    disabled={producto.stock === 0}
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white cursor-pointer"
+                    disabled={producto.stock === 0 || isAdding}
+                    className="w-full bg-orange-600 text-white hover:bg-orange-700 cursor-pointer"
                   >
                     <ShoppingCart className="w-4 h-4 mr-2" />
-                    {producto.stock === 0 ? "Agotado" : "Agregar al carrito"}
+                    {isAdding
+                      ? "Agregando..."
+                      : producto.stock === 0
+                      ? "Agotado"
+                      : "Agregar al carrito"}
                   </Button>
                 </div>
               </div>

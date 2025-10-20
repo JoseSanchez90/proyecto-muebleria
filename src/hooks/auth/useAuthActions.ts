@@ -110,7 +110,7 @@ export const useAuthActions = () => {
     },
   });
 
-  // SIGN IN MUTATION
+  // SIGN IN MUTATION - ACTUALIZADA CON NOMBRE PERSONALIZADO
   const signInMutation = useMutation({
     mutationFn: async ({
       email,
@@ -127,9 +127,33 @@ export const useAuthActions = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      toast("¡Bienvenido a Munfort!", {
-        icon: "👋",
+    onSuccess: async (data) => {
+      console.log("✅ Login exitoso, forzando actualización...");
+
+      // FORZAR ACTUALIZACIÓN DEL CACHE
+      await queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+      queryClient.setQueryData(["auth", "user"], data.user);
+
+      // Invalidar queries dependientes
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["profile"] }),
+        queryClient.invalidateQueries({ queryKey: ["favorites"] }),
+      ]);
+
+      // Obtener nombre del usuario de los metadatos
+      const userName =
+        data.user?.user_metadata?.name ||
+        data.user?.email?.split("@")[0] ||
+        "Usuario";
+
+      toast(`¡Bienvenido ${userName}!`, {
+        icon: "😄",
+        style: {
+          background: "#FF9340",
+          color: "#fff",
+          fontWeight: "bold",
+        },
       });
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,26 +168,60 @@ export const useAuthActions = () => {
 
       toast.error(errorMessage);
     },
-    // AGREGAR ESTO: Resetear el estado automáticamente después del error
-    retry: false, // No reintentar automáticamente
+    retry: false,
   });
 
-  // SIGN OUT MUTATION - NUEVO
+  // SIGN OUT MUTATION - VERSIÓN MEJORADA
   const signOutMutation = useMutation({
     mutationFn: async () => {
+      console.log("🚪 Ejecutando signOut en Supabase...");
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+
+      if (error) {
+        console.error("Error en supabase.auth.signOut:", error);
+        throw error;
+      }
+
+      console.log("SignOut ejecutado correctamente en Supabase");
+      return true;
     },
-    onSuccess: () => {
-      // Limpiar el cache del usuario y queries dependientes
+    onSuccess: async () => {
+      console.log("Limpiando cache después del signOut...");
+
+      // 1. PRIMERO limpiar el cache local
       queryClient.setQueryData(["auth", "user"], null);
-      queryClient.invalidateQueries({ queryKey: ["cart"] });
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
-      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+
+      // 2. LUEGO invalidar las queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["auth", "user"] }),
+        queryClient.invalidateQueries({ queryKey: ["cart"] }),
+        queryClient.invalidateQueries({ queryKey: ["profile"] }),
+        queryClient.invalidateQueries({ queryKey: ["favorites"] }),
+      ]);
+
+      // 3. Remover queries específicas para forzar recarga completa
+      queryClient.removeQueries({ queryKey: ["cart"] });
+      queryClient.removeQueries({ queryKey: ["profile"] });
+
+      console.log("Cache limpiado exitosamente después del signOut");
+
+      toast(`¡Nos vemos pronto!`, {
+        icon: "😊",
+        style: {
+          background: "#FF7000",
+          color: "#fff",
+          fontWeight: "bold",
+        },
+      });
     },
     onError: (error) => {
-      console.error("Error cerrando sesión:", error);
-      toast.error("Error al cerrar sesión");
+      console.error("Error en signOut mutation:", error);
+
+      // Forzar limpieza incluso si hay error
+      queryClient.setQueryData(["auth", "user"], null);
+      queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+
+      toast.error("Error al cerrar sesión, pero se limpió el estado local");
     },
   });
 
