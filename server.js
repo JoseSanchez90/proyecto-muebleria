@@ -2,8 +2,6 @@ import express from "express";
 import fetch from "node-fetch";
 import cors from "cors";
 import dotenv from "dotenv";
-import handler from "./api/create_preferences.js";
-
 dotenv.config();
 
 const app = express();
@@ -12,14 +10,13 @@ app.use(cors({ origin: process.env.FRONTEND_URL }));
 
 app.post("/api/create_preferences", async (req, res) => {
   try {
-    const accessToken = process.env.MP_ACCESS_TOKEN_TEST;
+    const accessToken = process.env.VITE_MERCADOPAGO_ACCESS_TOKEN;
 
     if (!accessToken) {
       console.error("No se encontró el access token de Mercado Pago.");
       return res.status(500).json({ error: "Missing Mercado Pago Access Token" });
     }
 
-    // 👇 Aseguramos que FRONTEND_URL exista
     const frontendUrl = process.env.FRONTEND_URL;
 
     const preference = {
@@ -50,7 +47,10 @@ app.post("/api/create_preferences", async (req, res) => {
       return res.status(response.status).json(data);
     }
 
-    return res.status(200).json({ init_point: data.init_point });
+    return res.status(200).json({
+      init_point: data.init_point,
+      preference_id: data.id,
+    });
   } catch (error) {
     console.error("Error en /api/create_preferences:", error);
     return res.status(500).json({ error: error.message });
@@ -58,5 +58,5 @@ app.post("/api/create_preferences", async (req, res) => {
 });
 
 app.listen(3001, () => {
-  console.log("Servidor corriendo en http://localhost:3001");
+  console.log("✅ Servidor corriendo en http://localhost:3001");
 });
