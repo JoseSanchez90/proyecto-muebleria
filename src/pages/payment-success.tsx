@@ -10,10 +10,24 @@ import {
   Mail,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
 function PaymentSuccess() {
   // En una implementación real, esto vendría de los parámetros de la URL o del estado
   const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [params] = useSearchParams();
+  const [paymentData, setPaymentData] = useState({
+    paymentId: "",
+    status: "",
+    merchantOrderId: "",
+  });
+
+  useEffect(() => {
+    const paymentId = params.get("payment_id") || "";
+    const status = params.get("status") || "";
+    const merchantOrderId = params.get("merchant_order_id") || "";
+    setPaymentData({ paymentId, status, merchantOrderId });
+  }, [params]);
 
   // Simulando la obtención del método de pago (en tu caso real vendría de la URL o estado)
   useEffect(() => {
@@ -87,6 +101,32 @@ function PaymentSuccess() {
               #MF{Date.now().toString().slice(-6)}
             </span>
           </p>
+          {/* Datos reales del pago de Mercado Pago */}
+          {paymentData.paymentId && (
+            <div className="text-sm text-gray-600 mb-6">
+              <p>
+                <strong>ID de pago:</strong> {paymentData.paymentId}
+              </p>
+              <p>
+                <strong>Estado:</strong>{" "}
+                <span
+                  className={
+                    paymentData.status === "approved"
+                      ? "text-green-600"
+                      : paymentData.status === "pending"
+                      ? "text-yellow-600"
+                      : "text-red-600"
+                  }
+                >
+                  {paymentData.status}
+                </span>
+              </p>
+              <p>
+                <strong>Orden de comercio:</strong>{" "}
+                {paymentData.merchantOrderId}
+              </p>
+            </div>
+          )}
 
           {/* Información específica del método de pago - Solo para Yape y Plin */}
           {paymentInfo.showCustomMessage && (
