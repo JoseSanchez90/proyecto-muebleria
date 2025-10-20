@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "../lib/supabaseClient";
+import { supabase } from "@/lib/supabaseClient";
 import MasVendidos from "@/features/masVendidos";
 import LoUltimo from "@/features/loUltimo";
 import { Link } from "react-router-dom";
