@@ -345,7 +345,7 @@ function Cart() {
                       />
                     </>
                   ) : (
-                    <Link to="/verificacion-de-pago">
+                    <Link to="/checkout">
                       <Button
                         size="lg"
                         className="w-full cursor-pointer flex gap-2 sm:gap-4 text-sm sm:text-base"
