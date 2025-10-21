@@ -41,7 +41,7 @@ function LoginModal({
         setEmail(savedEmail);
         setPassword(savedPassword);
         setRememberMe(true);
-        console.log("✅ Credenciales cargadas automáticamente");
+        console.log("Credenciales cargadas automáticamente");
       }
     }
   }, [isOpen]);
@@ -50,22 +50,18 @@ function LoginModal({
     e.preventDefault();
     setError("");
 
-    // ELIMINAR: setLoading(true);
-
     console.log("Intentando login con:", {
       email,
       password: "***",
       rememberMe,
     });
 
-    // LLAMAR signIn y manejar en los callbacks
     signIn(
       { email, password },
       {
         onSuccess: () => {
-          console.log("✅ Login exitoso");
+          console.log("Login exitoso");
 
-          // GUARDAR credenciales SI el login fue exitoso
           if (rememberMe) {
             localStorage.setItem("rememberedEmail", email);
             localStorage.setItem("rememberedPassword", password);
@@ -76,15 +72,13 @@ function LoginModal({
             console.log("Credenciales eliminadas de localStorage");
           }
 
-          // Reset form y cerrar modal
           setEmail("");
           setPassword("");
           onClose();
         },
         onError: (error) => {
-          console.log("❌ Login fallido:", error);
+          console.log("Login fallido:", error);
           setError("Correo o contraseña incorrectos");
-          // ❌ NO llamar setLoading(false) - React Query lo hace automáticamente
         },
       }
     );
@@ -136,6 +130,7 @@ function LoginModal({
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@email.com"
                 required
+                autoComplete="email"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
               />
             </div>
@@ -151,6 +146,7 @@ function LoginModal({
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Ingresa tu contraseña"
                   required
+                  autoComplete="current-password"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
                 <button
@@ -167,7 +163,7 @@ function LoginModal({
               </div>
             </div>
 
-            {/* Checkbox Recordar sesión - NUEVO */}
+            {/* Checkbox Recordar sesión */}
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="rememberMe"
@@ -185,7 +181,7 @@ function LoginModal({
 
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
-                {/* El checkbox ya está arriba, puedes eliminar este espacio si quieres */}
+                {/* Espacio para alineación */}
               </div>
               <button
                 type="button"

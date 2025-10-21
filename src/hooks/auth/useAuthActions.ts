@@ -130,16 +130,11 @@ export const useAuthActions = () => {
     onSuccess: async (data) => {
       console.log("✅ Login exitoso, forzando actualización...");
 
-      // FORZAR ACTUALIZACIÓN DEL CACHE
-      await queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+      // FORZAR ACTUALIZACIÓN DEL CACHE DEL USUARIO
       queryClient.setQueryData(["auth", "user"], data.user);
 
-      // Invalidar queries dependientes
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["cart"] }),
-        queryClient.invalidateQueries({ queryKey: ["profile"] }),
-        queryClient.invalidateQueries({ queryKey: ["favorites"] }),
-      ]);
+      // SOLO invalidar cart - las otras queries se actualizarán automáticamente
+      await queryClient.invalidateQueries({ queryKey: ["cart"] });
 
       // Obtener nombre del usuario de los metadatos
       const userName =
@@ -156,6 +151,7 @@ export const useAuthActions = () => {
         },
       });
     },
+    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (error: any) => {
       let errorMessage = "Error al iniciar sesión";

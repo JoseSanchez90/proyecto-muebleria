@@ -38,7 +38,7 @@ export const useAuthState = () => {
     refetchOnWindowFocus: false, // Evitar refetch al cambiar de pestaña
   });
 
-  // Escuchar cambios de autenticación - SOLO UNA VEZ GLOBALMENTE
+  // ESCUCHAR CAMBIOS DE AUTENTICACIÓN - SOLO UNA VEZ GLOBALMENTE
   useEffect(() => {
     if (globalAuthListenerSet) {
       console.log("Listener global ya está configurado, omitiendo...");
@@ -47,17 +47,17 @@ export const useAuthState = () => {
 
     globalAuthListenerSet = true;
     authListenerSet.current = true;
-    
+
     console.log("Configurando listener GLOBAL de auth...");
 
-    // Configurar el listener una sola vez - SIN guardar la referencia
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    // CONFIGURAR EL LISTENER UNA SOLA VEZ
+    supabase.auth.onAuthStateChange(async (event) => {
       console.log("Auth state changed:", event);
 
-      // Usar setQueryData de manera más eficiente
-      queryClient.setQueryData(["auth", "user"], session?.user || null);
+      // USAR setQueryData DE MANERA MÁS EFICIENTE
+      // queryClient.setQueryData(["auth", "user"], session?.user || null);
 
-      // Invalidar queries dependientes SOLO cuando sea necesario
+      // INVALIDAR QUERIES DEPENDIENTES SOLO CUANDO SEA NECESARIO
       if (event === "SIGNED_OUT") {
         console.log("Invalidando queries por SIGNED_OUT");
         await Promise.all([
@@ -65,24 +65,21 @@ export const useAuthState = () => {
           queryClient.invalidateQueries({ queryKey: ["profile"] }),
           queryClient.invalidateQueries({ queryKey: ["favorites"] }),
         ]);
-        // Limpiar cache específico
+        // LIMPIAR CACHE ESPECÍFICO
         queryClient.removeQueries({ queryKey: ["cart"] });
         queryClient.removeQueries({ queryKey: ["profile"] });
-      } 
-      else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        console.log("Actualizando queries por:", event);
-        // Para SIGNED_IN, las queries se actualizarán naturalmente
-        // No es necesario invalidar inmediatamente
       }
+      // SE ELIMINO COMPLETAMENTE EL BLOQUE ELSE IF PARA SIGNED_IN
+      // Las queries se actualizarán naturalmente a través de useCart
     });
 
-    return () => {
-      // Solo limpiar si este es el componente que creó el listener
-      if (authListenerSet.current) {
-        console.log("Componente principal con useAuthState desmontado");
-        // Pero mantenemos el listener global activo para toda la app
-      }
-    };
+    // return () => {
+    //   // SOLO LIMPIAR SI ESTE ES EL COMPONENTE QUE CREÓ EL LISTENER
+    //   if (authListenerSet.current) {
+    //     console.log("Componente principal con useAuthState desmontado");
+    //     // PERO MANTENEMOS EL LISTENER GLOBAL ACTIVO PARA TODA LA APP
+    //   }
+    // };
   }, [queryClient]);
 
   return {

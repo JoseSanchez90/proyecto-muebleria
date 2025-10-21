@@ -35,6 +35,8 @@ interface LocalCartItem {
   };
 }
 
+let syncInProgress = false;
+
 export const useCart = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -65,23 +67,45 @@ export const useCart = () => {
 
   // SINCRONIZAR CARRITO LOCAL CON USUARIO AL LOGEARSE
   useEffect(() => {
-    if (user?.id && localCart.length > 0) {
-      console.log("Sincronizando carrito local con usuario...", localCart);
+    // Solo sincronizar si:
+    // 1. Hay usuario logueado
+    // 2. Hay items en el carrito local
+    // 3. No hay una sincronización en progreso
+    // 4. El carrito local no está vacío
+    if (user?.id && localCart.length > 0 && !syncInProgress) {
+      console.log("Condiciones de sincronización cumplidas, ejecutando...");
       syncLocalCartWithUser();
+    } else if (user?.id && localCart.length === 0) {
+      console.log(
+        "Usuario logueado, pero carrito local vacío - omitiendo sincronización"
+      );
+    } else if (syncInProgress) {
+      console.log("Sincronización en progreso - omitiendo");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]); // Solo cuando el usuario cambia de null a logueado
+  }, [user?.id, localCart.length]); // Solo estas dependencias
 
   // FUNCIÓN PARA SINCRONIZAR CARRITO LOCAL CON SUPABASE
   const syncLocalCartWithUser = async () => {
+    // Si ya hay una sincronización en progreso, salir
+    if (syncInProgress) {
+      console.log("Sincronización ya en progreso, omitiendo...");
+      return;
+    }
+
+    syncInProgress = true;
+
     try {
       console.log("Iniciando sincronización de carrito local...");
 
-      for (const localItem of localCart) {
+      // Crear una copia del carrito local para trabajar con ella
+      const cartToSync = [...localCart];
+
+      for (const localItem of cartToSync) {
         // Verificar si ya existe en el carrito del usuario
         const { data: existingItem } = await supabase
           .from("cart_items")
-          .select("quantity")
+          .select("quantity, id")
           .eq("user_id", user!.id)
           .eq("product_id", localItem.product_id)
           .single();
@@ -89,28 +113,46 @@ export const useCart = () => {
         if (existingItem) {
           // Sumar cantidades
           const newQuantity = existingItem.quantity + localItem.quantity;
-          await supabase
+          const { error } = await supabase
             .from("cart_items")
             .update({ quantity: newQuantity })
             .eq("user_id", user!.id)
             .eq("product_id", localItem.product_id);
+
+          if (error) {
+            console.error(
+              `Error actualizando producto ${localItem.product_id}:`,
+              error
+            );
+            continue; // Continuar con el siguiente item si hay error
+          }
+
           console.log(
             `Producto ${localItem.product_id} actualizado: ${newQuantity}`
           );
         } else {
           // Crear nuevo item
-          await supabase.from("cart_items").insert({
+          const { error } = await supabase.from("cart_items").insert({
             user_id: user!.id,
             product_id: localItem.product_id,
             quantity: localItem.quantity,
           });
+
+          if (error) {
+            console.error(
+              `Error insertando producto ${localItem.product_id}:`,
+              error
+            );
+            continue; // Continuar con el siguiente item si hay error
+          }
+
           console.log(
             `Producto ${localItem.product_id} agregado: ${localItem.quantity}`
           );
         }
       }
 
-      // Limpiar carrito local después de sincronizar
+      // Limpiar carrito local después de sincronizar exitosamente
       await updateLocalCartMutation.mutateAsync([]);
       console.log("Carrito local sincronizado y limpiado");
 
@@ -118,6 +160,8 @@ export const useCart = () => {
       queryClient.invalidateQueries({ queryKey: ["cart", user!.id] });
     } catch (error) {
       console.error("Error sincronizando carrito:", error);
+    } finally {
+      syncInProgress = false;
     }
   };
 

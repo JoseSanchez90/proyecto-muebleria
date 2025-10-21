@@ -247,7 +247,7 @@ function Checkout() {
                           <img
                             src="/yape.webp"
                             alt="Yape Logo"
-                            className="w-10 md:w-12"
+                            className="w-8 md:w-10"
                           />
                         </div>
                       </div>
