@@ -97,6 +97,8 @@ function Checkout() {
       alert("Por favor selecciona un método de pago");
       return;
     }
+
+    // Para TODOS los métodos, mostrar detalles directamente
     setShowPaymentDetails(true);
   };
 

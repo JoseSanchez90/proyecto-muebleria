@@ -1,7 +1,7 @@
 import CardPayment from "@/checkout/paymentDetails/cardPayment";
-import YapePayment from "@/checkout/paymentDetails/yapePayment";
 import PlinPayment from "@/checkout/paymentDetails/plinPayment";
 import PaymentProcessingModal from "@/checkout/paymentDetails/paymentProcessingModal";
+import YapePayment from "./yapePayment";
 
 interface PaymentDetailsProps {
   method: string;
@@ -19,7 +19,7 @@ export default function PaymentDetails({
   return (
     <>
       {method === "card" && (
-        <CardPayment total={total} onPayment={onPayment} />
+        <CardPayment total={total} onPayment={onPayment} isProcessing={isProcessing} />
       )}
 
       {method === "yape" && (
