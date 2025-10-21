@@ -47,7 +47,7 @@ function PaymentSuccess() {
           description:
             "Estamos verificando tu pago a través de Yape. Una vez confirmado, procederemos con el envío de tu pedido.",
           icon: (
-            <img src="/public/yape.webp" alt="Yape-Logo" className="w-12" />
+            <img src="/yape.webp" alt="Yape-Logo" className="w-12" />
           ),
         };
       case "plin":
@@ -58,7 +58,7 @@ function PaymentSuccess() {
           description:
             "Estamos validando tu voucher de pago. Este proceso puede tomar hasta 24 horas para garantizar la seguridad de tu transacción.",
           icon: (
-            <img src="/public/plin.webp" alt="Plin-Logo" className="w-12" />
+            <img src="/plin.webp" alt="Plin-Logo" className="w-12" />
           ),
         };
       case "card":
@@ -69,7 +69,7 @@ function PaymentSuccess() {
           verificationTime: "",
           description: "",
           icon: (
-            <img src="/public/visa-logo.png" alt="Visa-Logo" className="w-12" />
+            <img src="/visa-logo.png" alt="Visa-Logo" className="w-12" />
           ),
         };
     }
