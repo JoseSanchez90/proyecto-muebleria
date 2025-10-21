@@ -120,7 +120,7 @@ export default function CardPayment({
             onChange={(e) => handleInputChange("number", e.target.value)}
             onFocus={() => setFocusedField("number")}
             onBlur={() => setFocusedField(null)}
-            className="font-mono text-lg"
+            className="font-mono text-lg bg-white"
             maxLength={19}
             required
             disabled={isProcessing}
@@ -140,6 +140,7 @@ export default function CardPayment({
             onChange={(e) => handleInputChange("name", e.target.value)}
             onFocus={() => setFocusedField("name")}
             onBlur={() => setFocusedField(null)}
+            className="bg-white"
             required
             disabled={isProcessing}
           />
@@ -159,6 +160,7 @@ export default function CardPayment({
               onChange={(e) => handleInputChange("expiry", e.target.value)}
               onFocus={() => setFocusedField("expiry")}
               onBlur={() => setFocusedField(null)}
+              className="bg-white"
               maxLength={5}
               required
               disabled={isProcessing}
@@ -177,6 +179,7 @@ export default function CardPayment({
               onChange={(e) => handleInputChange("cvv", e.target.value)}
               onFocus={() => setFocusedField("cvv")}
               onBlur={() => setFocusedField(null)}
+              className="bg-white"
               maxLength={4}
               required
               disabled={isProcessing}
@@ -188,10 +191,10 @@ export default function CardPayment({
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="flex items-start gap-2">
             <Lock className="w-4 h-4 text-blue-600 mt-0.5" />
-            <div className="text-xs text-blue-700">
-              <p className="font-medium">Pago seguro</p>
+            <div className="text-blue-700">
+              <p className="text-xs font-medium">Pago seguro</p>
               <p className="text-xs mt-1">
-                Tus datos están protegidos con encriptación SSL.
+                Datos protegidos con encriptación SSL.
               </p>
             </div>
           </div>
