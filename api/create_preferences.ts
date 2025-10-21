@@ -1,5 +1,6 @@
 // /api/create_preferences.ts
-export default async function handler(req, res) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function handler(req: any, res: any) {
   if (req.method !== "POST") {
     res.status(405).json({ error: "Método no permitido" });
     return;
