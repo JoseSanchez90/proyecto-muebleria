@@ -106,7 +106,7 @@ function Checkout() {
     setTimeout(async () => {
       await clearCart(); // Limpiar carrito
       setIsProcessing(false);
-      navigate(`/pago-exitoso?payment_method=${method}`);
+      navigate(`/payment-success?payment_method=${method}`);
     }, 5000);
   };
 
