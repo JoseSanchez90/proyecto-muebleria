@@ -34,11 +34,14 @@ export default function CardPayment({
         { title: "Pedido Mueblería Munfort", quantity: 1, unit_price: total },
       ];
 
-      const res = await fetch("/api/create_preferences", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
-      });
+      const res = await fetch(
+        "https://munfort.vercel.app/api/create_preferences",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items }),
+        }
+      );
 
       const data = await res.json();
 
