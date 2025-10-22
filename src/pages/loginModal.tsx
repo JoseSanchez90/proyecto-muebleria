@@ -46,6 +46,20 @@ function LoginModal({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen) {
+      // Bloquear scroll
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = "0px"; // Para evitar el shift del scrollbar
+
+      // Cleanup function
+      return () => {
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+      };
+    }
+  }, [isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -87,10 +101,10 @@ function LoginModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/90 lg:backdrop-blur-sm"
         onClick={onClose}
       />
 

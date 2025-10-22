@@ -24,12 +24,6 @@ function RegisterModal({
     email: "",
     dni: "",
     phone: "",
-    // birthdate: "",
-    // address: "",
-    // reference: "",
-    // department: "",
-    // province: "",
-    // district: "",
     password: "",
     confirmPassword: "",
     acceptTerms: false,
@@ -54,6 +48,20 @@ function RegisterModal({
       setError(signUpError.message || "Error al crear la cuenta");
     }
   }, [signUpError]);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Bloquear scroll
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = "0px"; // Para evitar el shift del scrollbar
+
+      // Cleanup function
+      return () => {
+        document.body.style.overflow = "";
+        document.body.style.paddingRight = "";
+      };
+    }
+  }, [isOpen]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -102,12 +110,6 @@ function RegisterModal({
           email: "",
           dni: "",
           phone: "",
-          // birthdate: "",
-          // address: "",
-          // reference: "",
-          // department: "",
-          // province: "",
-          // district: "",
           password: "",
           confirmPassword: "",
           acceptTerms: false,
@@ -120,10 +122,10 @@ function RegisterModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
       {/* Overlay */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/90 lg:backdrop-blur-sm"
         onClick={onClose}
       />
 
