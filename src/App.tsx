@@ -16,7 +16,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AppRoutes />
       <Toaster
-        position="top-center"
+        position="bottom-left"
         toastOptions={{
           style: {
             borderRadius: "12px",

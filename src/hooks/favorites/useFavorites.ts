@@ -102,7 +102,7 @@ export const useFavorites = () => {
         toast("Producto agregado a favoritos", {
           icon: "❤️",
           style: {
-            background: "#FF9340",
+            background: "#2735F5",
             color: "#fff",
             fontWeight: "bold",
           },
@@ -111,7 +111,7 @@ export const useFavorites = () => {
         toast("Producto removido de favoritos", {
           icon: "💔",
           style: {
-            background: "#FF9340",
+            background: "#2735F5",
             color: "#fff",
             fontWeight: "bold",
           },

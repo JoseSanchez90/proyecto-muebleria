@@ -23,6 +23,7 @@ import RegisterModal from "@/pages/registerModal";
 import ForgotPasswordModal from "@/pages/forgotPasswordModal";
 import { useProducts } from "@/hooks/products/useProducts";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 function NavbarMobile() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -46,7 +47,7 @@ function NavbarMobile() {
   const menuRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
-
+  const queryClient = useQueryClient();
   // Datos del usuario
   const userName = profileData?.name || user?.user_metadata?.name || "";
   const userAvatar = profileData?.avatar_url || user?.user_metadata?.avatar_url;
@@ -110,6 +111,7 @@ function NavbarMobile() {
   const handleSignOut = async () => {
     setLoggingOut(true);
     try {
+      queryClient.setQueryData(["auth", "user"], null);
       await signOut();
       setIsMenuOpen(false);
       setShowUserMenu(false);

@@ -70,16 +70,22 @@ function Footer() {
                   Sobre Nosotros
                 </a>
                 <a
-                  href="/politicas-de-envio"
+                  href="/politicas-envio"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Políticas de envío
                 </a>
                 <a
-                  href="/contacto"
+                  href="/terminos-condiciones"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
-                  Contacto
+                  Términos y Condiciones
+                </a>
+                <a
+                  href="/politicas-devoluciones"
+                  className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
+                >
+                  Políticas de Devoluciones
                 </a>
               </div>
             </div>

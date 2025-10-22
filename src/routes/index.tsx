@@ -22,6 +22,9 @@ const Success = lazy(() => import("@/checkout/success"))
 const Failure = lazy(() => import("@/checkout/failure"))
 const Pending = lazy(() => import("@/checkout/pending"))
 const NotFound = lazy(() => import("@/pages/notFound"))
+const ShippingPolicies = lazy(() => import("@/pages/shippingPolicies"))
+const TermsAndConditions = lazy(() => import("@/pages/termsAndConditions"))
+const ReturnsAndRefundsPolicy = lazy(() => import("@/pages/returnsAndRefundsPolicy"))
 
 const router = createBrowserRouter([
   {
@@ -38,6 +41,9 @@ const router = createBrowserRouter([
       { path: "/mis-favoritos", element: <Favorites /> },
       { path: "/mis-pedidos", element: <Orders /> },
       { path: "/sobre-nosotros", element: <About /> },
+      { path: "/politicas-envio", element: <ShippingPolicies /> },
+      { path: "/terminos-condiciones", element: <TermsAndConditions /> },
+      { path: "/politicas-devoluciones", element: <ReturnsAndRefundsPolicy /> },
       { path: "/sofas", element: <Sofa /> },
       { path: "/sillas", element: <Silla /> },
       { path: "/mesas", element: <Mesa /> },

@@ -65,7 +65,7 @@ function LoUltimo() {
       <div
         className={`${
           t.visible ? "animate-custom-enter" : "animate-custom-leave"
-        } max-w-xs w-full bg-[#FF9340] shadow-lg rounded-lg pointer-events-auto flex`}
+        } max-w-xs w-full bg-[#2735F5] shadow-lg rounded-lg pointer-events-auto flex`}
       >
         <div className="flex-1 w-0 p-2">
           <div className="flex items-center justify-center">

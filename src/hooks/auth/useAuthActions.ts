@@ -128,7 +128,7 @@ export const useAuthActions = () => {
       return data;
     },
     onSuccess: async (data) => {
-      console.log("✅ Login exitoso, forzando actualización...");
+      console.log("Login exitoso, forzando actualización...");
 
       // FORZAR ACTUALIZACIÓN DEL CACHE DEL USUARIO
       queryClient.setQueryData(["auth", "user"], data.user);
@@ -145,9 +145,9 @@ export const useAuthActions = () => {
       toast(`¡Bienvenido ${userName}!`, {
         icon: "😄",
         style: {
-          background: "#FF9340",
+          background: "#2735F5",
           color: "#fff",
-          fontWeight: "bold",
+          fontWeight: "semibold",
         },
       });
     },
@@ -204,9 +204,9 @@ export const useAuthActions = () => {
       toast(`¡Nos vemos pronto!`, {
         icon: "😊",
         style: {
-          background: "#FF7000",
+          background: "#2735F5",
           color: "#fff",
-          fontWeight: "bold",
+          fontWeight: "semibold",
         },
       });
     },

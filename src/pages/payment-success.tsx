@@ -130,7 +130,7 @@ function PaymentSuccess() {
 
           {/* Información específica del método de pago - Solo para Yape y Plin */}
           {paymentInfo.showCustomMessage && (
-            <div className="bg-orange-200 rounded-lg p-4 sm:p-6 mb-6">
+            <div className="bg-orange-100 rounded-lg p-4 sm:p-6 mb-6">
               <div className="flex flex-col items-center justify-center gap-2 mb-3">
                 <span className="text-xl">{paymentInfo.icon}</span>
                 <h3 className="font-semibold text-gray-800 text-sm sm:text-base">
@@ -138,7 +138,7 @@ function PaymentSuccess() {
                 </h3>
               </div>
               <div className="flex items-center justify-center gap-2 mb-3">
-                <Clock className="w-4 h-4 text-orange-600" />
+                <Clock className="w-5 h-5 text-orange-600" />
                 <p className="text-sm font-medium text-gray-800">
                   Tiempo de verificación: {paymentInfo.verificationTime}
                 </p>
@@ -147,8 +147,8 @@ function PaymentSuccess() {
                 {paymentInfo.description}
               </p>
               {/* Recordatorio de correo para todos los métodos */}
-              <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-600">
-                <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600" />
+              <div className="flex md:items-center justify-center md:gap-2 text-xs sm:text-sm text-gray-600">
+                <Mail className="w-4 h-4 sm:w-4 sm:h-4 text-orange-600" />
                 <span>
                   Recibirás toda la información y actualizaciones por correo
                   electrónico
@@ -161,7 +161,7 @@ function PaymentSuccess() {
           {paymentMethod === "card" && (
             <div className="bg-orange-100 rounded-lg p-4 sm:p-6 mb-6">
               <div className="flex items-center justify-center gap-2 mb-3">
-                <Package className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600" />
+                <Package className="w-5 h-5 text-orange-600" />
                 <h3 className="font-semibold text-sm sm:text-base">
                   Tu pedido está en proceso
                 </h3>
@@ -174,8 +174,8 @@ function PaymentSuccess() {
                 Tiempo estimado de envio: 2-5 días hábiles
               </div>
               {/* Recordatorio de correo para todos los métodos */}
-              <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-600">
-                <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-orange-600" />
+              <div className="flex md:items-center justify-center md:gap-2 text-xs sm:text-sm text-gray-600">
+                <Mail className="w-4 h-4 text-orange-600" />
                 <span>
                   Recibirás toda la información y actualizaciones por correo
                   electrónico
