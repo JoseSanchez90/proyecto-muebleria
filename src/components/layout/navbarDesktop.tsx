@@ -1,12 +1,6 @@
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
 import { Input } from "@/components/ui/input";
 import { IoIosSearch } from "react-icons/io";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LogOut, ShoppingCart, X } from "lucide-react";
 import { useAuth } from "@/hooks/auth/useAuth";
 import { useEffect, useRef, useState } from "react";
@@ -30,6 +24,7 @@ function NavbarDesktop() {
   const { totalItems, isLoading } = useCart();
   const { data: profileData } = useProfile(user?.id);
   const navigate = useNavigate();
+  const location = useLocation(); // Para detectar la ruta actual
   // Usa tu hook de React Query para obtener los productos
   const { products: allProducts, isLoading: productsLoading } = useProducts();
   // Estados para la búsqueda
@@ -39,6 +34,14 @@ function NavbarDesktop() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
+
+  // Función para determinar si un enlace está activo
+  const isActiveLink = (path: string) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+    return location.pathname.startsWith(path);
+  };
 
   // Función de búsqueda en tiempo real
   const handleSearch = (query: string) => {
@@ -108,7 +111,7 @@ function NavbarDesktop() {
       toast.error("Hubo un problema al cerrar sesión.");
     } finally {
       setLoggingOut(false);
-      setShowLoginModal(false)
+      setShowLoginModal(false);
     }
   };
 
@@ -140,40 +143,82 @@ function NavbarDesktop() {
             <p className="font-sans font-bold text-xl 2xl:text-2xl">Munfort</p>
           </button>
         </Link>
-        <NavigationMenu viewport={false}>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuLink href="/" className="font-semibold">
-                Inicio
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink href="/productos" className="font-semibold">
-                Productos
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink href="/sofas" className="font-semibold">
-                Sofás
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink href="/sillas" className="font-semibold">
-                Sillas
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink href="/mesas" className="font-semibold">
-                Mesas
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink href="/decoracion" className="font-semibold">
-                Decoración
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
+
+        {/* NUEVO NAVBAR CON LÍNEA ACTIVA */}
+        <nav className="flex items-center space-x-8">
+          <Link
+            to="/"
+            className={`relative font-semibold text-gray-800 hover:text-orange-600 transition-colors duration-200 py-0.5 ${
+              isActiveLink("/") ? "text-orange-600" : ""
+            }`}
+          >
+            Inicio
+            {isActiveLink("/") && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
+            )}
+          </Link>
+
+          <Link
+            to="/productos"
+            className={`relative font-semibold text-gray-800 hover:text-orange-600 transition-colors duration-200 py-0.5 ${
+              isActiveLink("/productos") ? "text-orange-600" : ""
+            }`}
+          >
+            Productos
+            {isActiveLink("/productos") && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
+            )}
+          </Link>
+
+          <Link
+            to="/sofas"
+            className={`relative font-semibold text-gray-800 hover:text-orange-600 transition-colors duration-200 py-0.5 ${
+              isActiveLink("/sofas") ? "text-orange-600" : ""
+            }`}
+          >
+            Sofás
+            {isActiveLink("/sofas") && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
+            )}
+          </Link>
+
+          <Link
+            to="/sillas"
+            className={`relative font-semibold text-gray-800 hover:text-orange-600 transition-colors duration-200 py-0.5 ${
+              isActiveLink("/sillas") ? "text-orange-600" : ""
+            }`}
+          >
+            Sillas
+            {isActiveLink("/sillas") && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
+            )}
+          </Link>
+
+          <Link
+            to="/mesas"
+            className={`relative font-semibold text-gray-800 hover:text-orange-600 transition-colors duration-200 py-0.5 ${
+              isActiveLink("/mesas") ? "text-orange-600" : ""
+            }`}
+          >
+            Mesas
+            {isActiveLink("/mesas") && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
+            )}
+          </Link>
+
+          <Link
+            to="/decoracion"
+            className={`relative font-semibold text-gray-800 hover:text-orange-600 transition-colors duration-200 py-0.5 ${
+              isActiveLink("/decoracion") ? "text-orange-600" : ""
+            }`}
+          >
+            Decoración
+            {isActiveLink("/decoracion") && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-600"></div>
+            )}
+          </Link>
+        </nav>
+
         <div className="flex items-center justify-center gap-6">
           {/* Búsqueda con resultados en tiempo real */}
           <div className="flex relative" ref={searchRef}>
