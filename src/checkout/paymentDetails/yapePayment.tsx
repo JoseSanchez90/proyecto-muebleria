@@ -16,101 +16,172 @@ export default function YapePayment({
   onPayment,
   isProcessing = false,
 }: YapePaymentProps) {
-
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [confirmationCode, setConfirmationCode] = useState("");
   const [showYapeHelp, setShowYapeHelp] = useState(false);
+  const [step, setStep] = useState<"phone" | "code">("phone");
+
+  const handleContinue = () => {
+    if (phoneNumber.length === 9) {
+      setStep("code");
+    }
+  };
+
+  const handleBack = () => {
+    setStep("phone");
+    setConfirmationCode("");
+  };
 
   return (
     <div className="space-y-4 text-center">
       <h4 className="font-semibold text-lg">Pago con Yape</h4>
 
-      {/* Código de confirmación CON TOOLTIP */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-center gap-2 relative">
-          <Label htmlFor="confirmationCode" className="text-sm font-medium">
-            Ingresa tu código de aprobación (6 dígitos)
-          </Label>
-
-          {/* Botón de ayuda con tooltip */}
-          <div className="relative">
-            <button
-              onClick={() => setShowYapeHelp(!showYapeHelp)}
-              className="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer transition-colors"
+      {/* Paso 1: Ingreso del número de Yape */}
+      {step === "phone" && (
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label
+              htmlFor="phoneNumber"
+              className="text-sm font-medium block text-center"
             >
-              ?
+              Ingresa tu número de Yape
+            </Label>
+            <Input
+              id="phoneNumber"
+              type="text"
+              inputMode="numeric"
+              placeholder="9•• ••• •••"
+              value={phoneNumber}
+              onChange={(e) => {
+                const onlyNumbers = e.target.value.replace(/\D/g, "");
+                if (onlyNumbers.length <= 9) {
+                  setPhoneNumber(onlyNumbers);
+                }
+              }}
+              className="text-center font-mono text-lg bg-white"
+              maxLength={9}
+            />
+            <p className="text-xs text-gray-500">
+              Ingresa tu número de 9 dígitos asociado a Yape
+            </p>
+          </div>
+
+          <Button
+            onClick={handleContinue}
+            disabled={phoneNumber.length !== 9}
+            className="w-full bg-orange-600 hover:bg-orange-700 cursor-pointer"
+          >
+            Continuar
+          </Button>
+        </div>
+      )}
+
+      {/* Paso 2: Código de confirmación */}
+      {step === "code" && (
+        <div className="space-y-4">
+          {/* Información del número ingresado */}
+          <div className="bg-gray-50 rounded-lg p-3">
+            <p className="text-sm text-gray-600">
+              Número Yape:{" "}
+              <span className="font-semibold">+51 {phoneNumber}</span>
+            </p>
+            <button
+              onClick={handleBack}
+              className="text-xs text-orange-600 hover:text-orange-700 mt-1 cursor-pointer underline"
+            >
+              Cambiar número
             </button>
+          </div>
 
-            {/* Tooltip que se abre arriba del botón */}
-            {showYapeHelp && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-50 mb-2 z-50">
-                {/* Flecha indicadora hacia abajo */}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-white"></div>
+          {/* Código de confirmación CON TOOLTIP */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-center gap-2 relative">
+              <Label htmlFor="confirmationCode" className="text-sm font-medium">
+                Ingresa tu código de aprobación (6 dígitos)
+              </Label>
 
-                {/* Contenido del tooltip */}
-                <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-64 relative">
-                  {/* Botón cerrar */}
-                  <button
-                    onClick={() => setShowYapeHelp(false)}
-                    className="absolute top-2 right-2 w-4 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    <X className="text-orange-600" />
-                  </button>
+              {/* Botón de ayuda con tooltip */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowYapeHelp(!showYapeHelp)}
+                  className="w-5 h-5 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-600 cursor-pointer transition-colors"
+                >
+                  ?
+                </button>
 
-                  <h3 className="text-sm text-start font-bold mb-2 text-gray-900 pr-4">
-                    ¿Dónde encuentro mi código?
-                  </h3>
-                  <div className="space-y-1.5 text-start text-xs text-gray-600">
-                    <div className="flex items-start gap-2">
-                      <span className="text-orange-600 font-bold">1.</span>
-                      <span>Abre tu app de Yape</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-orange-600 font-bold">2.</span>
-                      <span>Ve a "Aprobar compras"</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-orange-600 font-bold">3.</span>
-                      <span>Dirigete a "Código de aprobación"</span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-orange-600 font-bold">4.</span>
-                      <span>
-                        Copia el <strong>código de 6 dígitos</strong>
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="text-orange-600 font-bold">5.</span>
-                      <span>Ingresa ese código aquí</span>
+                {/* Tooltip que se abre arriba del botón */}
+                {showYapeHelp && (
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-50 mb-2 z-50">
+                    {/* Flecha indicadora hacia abajo */}
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-white"></div>
+
+                    {/* Contenido del tooltip */}
+                    <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-64 relative">
+                      {/* Botón cerrar */}
+                      <button
+                        onClick={() => setShowYapeHelp(false)}
+                        className="absolute top-2 right-2 w-4 h-4 flex items-center justify-center text-gray-400 hover:text-gray-600 cursor-pointer"
+                      >
+                        <X className="text-orange-600" />
+                      </button>
+
+                      <h3 className="text-sm text-start font-bold mb-2 text-gray-900 pr-4">
+                        ¿Dónde encuentro mi código?
+                      </h3>
+                      <div className="space-y-1.5 text-start text-xs text-gray-600">
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">1.</span>
+                          <span>Abre tu app de Yape</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">2.</span>
+                          <span>Ve a "Aprobar compras"</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">3.</span>
+                          <span>Dirigete a "Código de aprobación"</span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">4.</span>
+                          <span>
+                            Copia el <strong>código de 6 dígitos</strong>
+                          </span>
+                        </div>
+                        <div className="flex items-start gap-2">
+                          <span className="text-orange-600 font-bold">5.</span>
+                          <span>Ingresa ese código aquí</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
-            )}
+            </div>
+
+            <Input
+              id="confirmationCode"
+              placeholder="xxxxxx"
+              maxLength={6}
+              value={confirmationCode}
+              onChange={(e) =>
+                setConfirmationCode(e.target.value.replace(/\D/g, ""))
+              }
+              className="text-center font-mono text-lg bg-white text-orange-600 font-bold"
+            />
+            <p className="text-xs text-gray-500">
+              Ingresa los 6 dígitos que aparecen en tu Yape
+            </p>
           </div>
+
+          <Button
+            onClick={onPayment}
+            disabled={confirmationCode.length !== 6 || isProcessing}
+            className="w-full bg-orange-600 hover:bg-orange-700 cursor-pointer"
+          >
+            {isProcessing ? "Procesando..." : `Pagar S/ ${formatPrice(total)}`}
+          </Button>
         </div>
-
-        <Input
-          id="confirmationCode"
-          placeholder="xxxxxx"
-          maxLength={6}
-          value={confirmationCode}
-          onChange={(e) =>
-            setConfirmationCode(e.target.value.replace(/\D/g, ""))
-          }
-          className="text-center font-mono text-lg bg-white text-orange-600 font-bold"
-        />
-        <p className="text-xs text-gray-500">
-          Ingresa los 6 dígitos que aparecen en tu Yape
-        </p>
-      </div>
-
-      <Button
-        onClick={onPayment}
-        disabled={confirmationCode.length !== 6 || isProcessing}
-        className="w-full bg-orange-600 hover:bg-orange-700 cursor-pointer"
-      >
-        { isProcessing ? "Procesando..." : `Pagar S/ ${formatPrice(total)}`}
-      </Button>
+      )}
     </div>
   );
 }
