@@ -42,7 +42,7 @@ export default function YapePayment({
 
             {/* Tooltip que se abre arriba del botón */}
             {showYapeHelp && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+              <div className="absolute bottom-full left-1/2 transform -translate-x-50 mb-2 z-50">
                 {/* Flecha indicadora hacia abajo */}
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-l-transparent border-r-4 border-r-transparent border-t-4 border-t-white"></div>
 
@@ -97,7 +97,7 @@ export default function YapePayment({
           onChange={(e) =>
             setConfirmationCode(e.target.value.replace(/\D/g, ""))
           }
-          className="text-center font-mono text-lg text-orange-600 font-bold"
+          className="text-center font-mono text-lg bg-white text-orange-600 font-bold"
         />
         <p className="text-xs text-gray-500">
           Ingresa los 6 dígitos que aparecen en tu Yape

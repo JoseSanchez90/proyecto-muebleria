@@ -188,8 +188,7 @@ function PaymentSuccess() {
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-6 sm:mt-8">
             <Link to="/" className="w-full sm:w-auto">
               <Button
-                variant="outline"
-                className="flex items-center gap-2 cursor-pointer border-gray-500 w-full sm:w-auto"
+                className="flex items-center gap-2 cursor-pointer w-full sm:w-auto"
               >
                 <Home className="w-4 h-4" />
                 Volver al inicio

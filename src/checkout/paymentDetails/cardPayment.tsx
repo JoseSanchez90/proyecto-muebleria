@@ -50,6 +50,11 @@ export default function CardPayment({
       formattedValue = value.replace(/\D/g, "").slice(0, 3);
     }
 
+    // Solo letras y espacios para el nombre
+    if (field === "name") {
+      formattedValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, ""); // Solo letras y espacios
+    }
+
     setCardData((prev) => ({
       ...prev,
       [field]: formattedValue,

@@ -7,7 +7,6 @@ import {
   LogOut,
   Search,
   ChevronDown,
-  ChevronRight,
   User,
   Heart,
   Package,
@@ -27,7 +26,6 @@ import { useQueryClient } from "@tanstack/react-query";
 
 function NavbarMobile() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [openCategories, setOpenCategories] = useState<string[]>([]);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
@@ -123,15 +121,6 @@ function NavbarMobile() {
     }
   };
 
-  // Toggle categorías
-  const toggleCategory = (category: string) => {
-    setOpenCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category]
-    );
-  };
-
   // Cerrar menús al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -156,35 +145,6 @@ function NavbarMobile() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  // Categorías y subcategorías
-  const categories = [
-    {
-      title: "Sillas",
-      items: [
-        { label: "Comedor", path: "/silla/comedor" },
-        { label: "Oficina", path: "/silla/oficina" },
-        { label: "Todos", path: "/sillas" },
-      ],
-    },
-    {
-      title: "Mesas",
-      items: [
-        { label: "Comedor", path: "/mesas/comedor" },
-        { label: "Centro", path: "/mesas/centro" },
-        { label: "Todos", path: "/mesas" },
-      ],
-    },
-    {
-      title: "Decoración",
-      items: [
-        { label: "Cocina", path: "/decoracion/cocina" },
-        { label: "Baño", path: "/decoracion/baño" },
-        { label: "Paredes", path: "/decoracion/paredes" },
-        { label: "Todos", path: "/decoracion" },
-      ],
-    },
-  ];
 
   return (
     <>
@@ -477,44 +437,39 @@ function NavbarMobile() {
                 >
                   Sofás
                 </Link>
-              </div>
-
-              {/* Categorías desplegables */}
-              <div>
-                {categories.map((category) => (
-                  <div key={category.title} className="mb-2">
-                    <button
-                      onClick={() => toggleCategory(category.title)}
-                      className="flex items-center justify-between w-full py-3 px-4 text-gray-800 hover:bg-gray-50 rounded-lg font-medium transition-colors"
-                    >
-                      <span>{category.title}</span>
-                      {openCategories.includes(category.title) ? (
-                        <ChevronDown className="w-5 h-5" />
-                      ) : (
-                        <ChevronRight className="w-5 h-5" />
-                      )}
-                    </button>
-
-                    {openCategories.includes(category.title) && (
-                      <div className="ml-4 space-y-1 mt-1 animate-in fade-in duration-200">
-                        {category.items.map((item) => (
-                          <Link
-                            key={item.path}
-                            to={item.path}
-                            className={`block py-2 px-4 rounded-lg text-sm transition-colors ${
-                              isActiveRoute(item.path)
-                                ? "text-orange-600 bg-orange-50 font-medium"
-                                : "text-gray-600 hover:bg-gray-50"
-                            }`}
-                            onClick={() => setIsMenuOpen(false)}
-                          >
-                            {item.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                <Link
+                  to="/sofas"
+                  className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                    isActiveRoute("/sillas")
+                      ? "text-orange-600 bg-orange-50"
+                      : "text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Sillas
+                </Link>
+                <Link
+                  to="/sofas"
+                  className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                    isActiveRoute("/mesas")
+                      ? "text-orange-600 bg-orange-50"
+                      : "text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Mesas
+                </Link>
+                <Link
+                  to="/sofas"
+                  className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
+                    isActiveRoute("/decoracion")
+                      ? "text-orange-600 bg-orange-50"
+                      : "text-gray-800 hover:bg-gray-50"
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Decoración
+                </Link>
               </div>
 
               {/* Botones de autenticación (solo para no logueados) */}
