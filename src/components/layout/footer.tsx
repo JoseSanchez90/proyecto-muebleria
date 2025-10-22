@@ -1,4 +1,5 @@
 import { BsFacebook, BsInstagram, BsWhatsapp } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 function Footer() {
   return (
@@ -30,30 +31,30 @@ function Footer() {
             <div className="flex flex-col space-y-3 items-center">
               <div className="flex flex-col gap-3">
                 <h3 className="text-lg font-bold text-gray-900 pb-2">Tienda</h3>
-                <a
-                  href="/sofas"
+                <Link
+                  to="/sofas"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Sofás
-                </a>
-                <a
-                  href="/sillas"
+                </Link>
+                <Link
+                  to="/sillas"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Sillas
-                </a>
-                <a
-                  href="/mesas"
+                </Link>
+                <Link
+                  to="/mesas"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Mesas
-                </a>
-                <a
-                  href="/decoracion"
+                </Link>
+                <Link
+                  to="/decoracion"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Decoración
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -63,30 +64,30 @@ function Footer() {
                 <h3 className="text-lg font-bold text-gray-900 pb-2">
                   Información
                 </h3>
-                <a
-                  href="/sobre-nosotros"
+                <Link
+                  to="/sobre-nosotros"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Sobre Nosotros
-                </a>
-                <a
-                  href="/politicas-envio"
+                </Link>
+                <Link
+                  to="/politicas-envio"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Políticas de envío
-                </a>
-                <a
-                  href="/terminos-condiciones"
+                </Link>
+                <Link
+                  to="/terminos-condiciones"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Términos y Condiciones
-                </a>
-                <a
-                  href="/politicas-devoluciones"
+                </Link>
+                <Link
+                  to="/politicas-devoluciones"
                   className="text-gray-600 hover:text-orange-600 transition-colors text-sm sm:text-base"
                 >
                   Políticas de Devoluciones
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -95,27 +96,27 @@ function Footer() {
           <div className="flex flex-col gap-4 text-center md:text-left col-span-1 md:col-span-2 lg:col-span-1">
             <h3 className="text-lg font-bold text-gray-900">Síguenos</h3>
             <div className="flex justify-center md:justify-start items-center gap-6">
-              <a
-                href="https://web.whatsapp.com/"
+              <Link
+                to="https://web.whatsapp.com/"
                 className="text-gray-600 hover:text-green-600 transition-colors transform hover:scale-110"
                 aria-label="WhatsApp"
               >
                 <BsWhatsapp className="w-5 h-5 2xl:w-6 2xl:h-6" />
-              </a>
-              <a
-                href="https://www.facebook.com/"
+              </Link>
+              <Link
+                to="https://www.facebook.com/"
                 className="text-gray-600 hover:text-blue-600 transition-colors transform hover:scale-110"
                 aria-label="Facebook"
               >
                 <BsFacebook className="w-5 h-5 2xl:w-6 2xl:h-6" />
-              </a>
-              <a
-                href="https://www.instagram.com/"
+              </Link>
+              <Link
+                to="https://www.instagram.com/"
                 className="text-gray-600 hover:text-purple-500 transition-colors transform hover:scale-110"
                 aria-label="Instagram"
               >
                 <BsInstagram className="w-5 h-5 2xl:w-6 2xl:h-6" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>
