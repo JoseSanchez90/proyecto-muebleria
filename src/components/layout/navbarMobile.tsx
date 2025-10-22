@@ -438,7 +438,7 @@ function NavbarMobile() {
                   Sofás
                 </Link>
                 <Link
-                  to="/sofas"
+                  to="/sillas"
                   className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
                     isActiveRoute("/sillas")
                       ? "text-orange-600 bg-orange-50"
@@ -449,7 +449,7 @@ function NavbarMobile() {
                   Sillas
                 </Link>
                 <Link
-                  to="/sofas"
+                  to="/mesas"
                   className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
                     isActiveRoute("/mesas")
                       ? "text-orange-600 bg-orange-50"
@@ -460,7 +460,7 @@ function NavbarMobile() {
                   Mesas
                 </Link>
                 <Link
-                  to="/sofas"
+                  to="/decoracion"
                   className={`block py-3 px-4 rounded-lg font-medium transition-colors ${
                     isActiveRoute("/decoracion")
                       ? "text-orange-600 bg-orange-50"

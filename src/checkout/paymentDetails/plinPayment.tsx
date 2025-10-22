@@ -31,7 +31,7 @@ export default function PlinPayment({ total, onPayment, isProcessing }: PlinPaym
           <div className="bg-white p-6 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center">
             <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
               <img
-                src="/public/qr.png"
+                src="/qr.png"
                 alt="QR Plin"
                 className="w-full h-full object-cover"
               />
