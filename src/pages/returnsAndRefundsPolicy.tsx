@@ -105,7 +105,6 @@ const ReturnsAndRefundsPolicy = () => {
               </h4>
               <ul className="text-xs text-green-700 space-y-1">
                 <li>• En perfecto estado y sin uso</li>
-                <li>• Embalaje original completo</li>
                 <li>• Todos los accesorios incluidos</li>
                 <li>• Factura de compra presente</li>
                 <li>• Dentro de los 7 días de retracto</li>
@@ -118,7 +117,6 @@ const ReturnsAndRefundsPolicy = () => {
               <ul className="text-xs text-red-700 space-y-1">
                 <li>• Productos personalizados</li>
                 <li>• Artículos de higiene personal</li>
-                <li>• Software abierto</li>
                 <li>• Productos instalados</li>
                 <li>• Embalaje dañado</li>
               </ul>
