@@ -18,7 +18,6 @@ const Mesa = lazy(() => import("@/pages/mesa"))
 const Silla = lazy(() => import("@/pages/silla"))
 const Decoracion = lazy(() => import("@/pages/decoracion"))
 const About = lazy(() => import("@/pages/about"))
-const NotFound = lazy(() => import("@/pages/notFound"))
 const ShippingPolicies = lazy(() => import("@/pages/shippingPolicies"))
 const TermsAndConditions = lazy(() => import("@/pages/termsAndConditions"))
 const ReturnsAndRefundsPolicy = lazy(() => import("@/pages/returnsAndRefundsPolicy"))
@@ -45,7 +44,6 @@ const router = createBrowserRouter([
       { path: "/sillas", element: <Silla /> },
       { path: "/mesas", element: <Mesa /> },
       { path: "/decoracion", element: <Decoracion /> },
-      { path: "*", element: <NotFound /> },
     ],
   },
 ]);
